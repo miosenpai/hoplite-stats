@@ -7,4 +7,10 @@ export default defineNuxtConfig({
   runtimeConfig: {
 
   },
+  modules: [
+    '@nuxt/ui',
+  ],
+  tailwindcss: {
+    viewer: false,
+  },
 })
