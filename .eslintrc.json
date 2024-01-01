@@ -1,0 +1,10 @@
+{
+  "root": true,
+  "plugins": [
+    "@stylistic"
+  ],
+  "extends": [
+    "plugin:@stylistic/recommended-extends",
+    "@nuxt/eslint-config"
+  ]
+}

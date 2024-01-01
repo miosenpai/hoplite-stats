@@ -2,9 +2,9 @@
 export default defineNuxtConfig({
   devtools: { enabled: false },
   devServer: {
-    host: '127.0.0.1'
+    host: '127.0.0.1',
   },
   runtimeConfig: {
-    
-  }
+
+  },
 })

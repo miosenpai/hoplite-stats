@@ -2,10 +2,11 @@ import mineflayer from 'mineflayer'
 
 const bot = mineflayer.createBot({
   host: 'hoplite.gg',
-  username: ''
+  username: '',
 })
 
 bot.on('resourcePack', (url, hash) => {
+  console.log('Incoming resource pack request.', { url, hash })
   bot.acceptResourcePack()
 })
 
@@ -17,5 +18,5 @@ bot.on('kicked', console.log)
 bot.on('error', console.log)
 
 export function useMineflayer() {
-  return bot;
+  return bot
 }
