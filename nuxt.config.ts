@@ -1,3 +1,5 @@
+import defaultTheme from 'tailwindcss/defaultTheme'
+
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   devtools: { enabled: false },
@@ -14,8 +16,20 @@ export default defineNuxtConfig({
   modules: [
     '@nuxt/ui',
   ],
+  css: [
+    '@fontsource-variable/dm-sans',
+  ],
   tailwindcss: {
     viewer: false,
+    config: {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"DM Sans Variable"', ...defaultTheme.fontFamily.sans],
+          },
+        },
+      },
+    },
   },
   nitro: {
     experimental: {
