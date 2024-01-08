@@ -59,8 +59,7 @@ async function createNewBot() {
   const inactiveDc = setTimeout(() => {
     console.log('Bot Inactive: Quitting')
     newBot.quit()
-  }, 10 * 60 * 1000)
-  // todo: use runtimeCfg inactive time limit
+  }, dayjs.duration(runtimeCfg.bot.idleMinutes, 'minutes').asMilliseconds())
 
   newBot.on('end', (reason) => {
     if (reason !== 'disconnect.quitting')

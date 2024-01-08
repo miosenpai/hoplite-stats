@@ -31,7 +31,8 @@ const getHopliteStats = defineCachedFunction(async (uuid: string, username: stri
 
   return scrapeRes
 }, {
-  maxAge: 30,
+  // todo: figure out a good cache duration for stats
+  maxAge: dayjs.duration(12, 'hours').asSeconds(),
   name: 'hoplite-stats',
   getKey(uuid) {
     return uuid

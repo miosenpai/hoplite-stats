@@ -15,6 +15,7 @@
     "@nuxt/ui": "^2.11.1",
     "@stylistic/eslint-plugin": "^1.5.1",
     "bullmq": "^5.1.1",
+    "dayjs": "^1.11.10",
     "eslint": "^8.56.0",
     "jsonata": "^2.0.3",
     "mineflayer": "^4.14.0",
