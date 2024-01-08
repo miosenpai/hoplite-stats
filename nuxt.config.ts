@@ -7,7 +7,7 @@ export default defineNuxtConfig({
   runtimeConfig: {
     bot: {
       idleMinutes: 10,
-      serverHost: '127.0.0.1',
+      serverHost: '',
       authName: '',
     },
   },

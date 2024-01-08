@@ -16,6 +16,7 @@
     "@stylistic/eslint-plugin": "^1.5.1",
     "bullmq": "^5.1.1",
     "eslint": "^8.56.0",
+    "jsonata": "^2.0.3",
     "mineflayer": "^4.14.0",
     "nuxt": "^3.9.0",
     "vue": "^3.4.0",

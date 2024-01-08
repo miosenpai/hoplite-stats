@@ -11,5 +11,29 @@ export default defineEventHandler(async (event) => {
       statusMessage: 'This user does not own Minecraft.',
     })
 
-  return uuidRes
+  const stats = await getHopliteStats(uuidRes.id, uuidRes.name)
+
+  return stats
+})
+
+const getHopliteStats = defineCachedFunction(async (uuid: string, username: string) => {
+  const { statsQueue, statsQueueEvents } = useStatsQueue()
+
+  const scrapeJob = await statsQueue.add(
+    'scrape',
+    { username },
+    {
+      removeOnFail: true, // for dev
+    },
+  )
+
+  const scrapeRes = await scrapeJob.waitUntilFinished(statsQueueEvents)
+
+  return scrapeRes
+}, {
+  maxAge: 30,
+  name: 'hoplite-stats',
+  getKey(uuid) {
+    return uuid
+  },
 })
