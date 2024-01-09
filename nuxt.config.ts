@@ -19,6 +19,10 @@ export default defineNuxtConfig({
   css: [
     '@fontsource-variable/dm-sans',
   ],
+  ui: {
+    // 'all' doesn't work on latest stable, it works on edge
+    icons: ['mdi'],
+  },
   tailwindcss: {
     viewer: false,
     config: {

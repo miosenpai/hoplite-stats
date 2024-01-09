@@ -12,6 +12,7 @@
   },
   "devDependencies": {
     "@fontsource-variable/dm-sans": "^5.0.3",
+    "@iconify/json": "^2.2.166",
     "@nuxt/eslint-config": "^0.2.0",
     "@nuxt/ui": "^2.11.1",
     "@stylistic/eslint-plugin": "^1.5.1",
