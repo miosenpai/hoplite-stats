@@ -50,4 +50,7 @@ export default defineNuxtConfig({
   typescript: {
     typeCheck: 'build',
   },
+  colorMode: {
+    preference: 'dark',
+  },
 })

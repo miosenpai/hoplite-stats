@@ -20,15 +20,25 @@
           Hoplite Stats
         </h2>
       </NuxtLink>
-      <PlayerSearch class="col-span-2" />
+      <PlayerSearch
+        v-if="route.path !== '/'"
+        class="col-span-2"
+      />
       <UButton
         icon="i-mdi-github"
         color="white"
         size="xl"
-        class="justify-self-end"
+        :class="[
+          'justify-self-end',
+          'col-start-4'
+        ]"
         variant="ghost"
       />
     </UContainer>
     <UDivider />
   </header>
 </template>
+
+<script setup lang="ts">
+const route = useRoute()
+</script>
