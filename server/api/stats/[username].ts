@@ -12,6 +12,17 @@ export default defineEventHandler(async (event) => {
     })
   }
 
+  const cacheStore = useStorage('cache')
+
+  const firstScrape = !(await cacheStore.hasItem(`nitro:functions:hoplite-stats:${uuidRes._data.id}.json`))
+
+  if (firstScrape) {
+    // we use uuid as job key, this way we can't add duplicate scapes
+    getHopliteStats(uuidRes._data.id, uuidRes._data.name)
+    setResponseStatus(event, 202)
+    return
+  }
+
   const stats = await getHopliteStats(uuidRes._data.id, uuidRes._data.name)
 
   return stats
@@ -24,7 +35,9 @@ const getHopliteStats = defineCachedFunction(async (uuid: string, username: stri
     'scrape',
     { username },
     {
-      removeOnFail: true, // for dev
+      removeOnFail: true,
+      removeOnComplete: true,
+      jobId: uuid,
     },
   )
 
