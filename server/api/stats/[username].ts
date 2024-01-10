@@ -31,6 +31,8 @@ export default defineEventHandler(async (event) => {
 const getHopliteStats = defineCachedFunction(async (uuid: string, username: string) => {
   const { statsQueue, statsQueueEvents } = useStatsQueue()
 
+  console.log('Adding Job:', { uuid, username })
+
   const scrapeJob = await statsQueue.add(
     'scrape',
     { username },
@@ -40,6 +42,8 @@ const getHopliteStats = defineCachedFunction(async (uuid: string, username: stri
       jobId: uuid,
     },
   )
+
+  console.log('Job Added')
 
   const scrapeRes = await scrapeJob.waitUntilFinished(statsQueueEvents)
   console.log('Finished Scraping Stats')
