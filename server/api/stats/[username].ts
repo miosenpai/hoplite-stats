@@ -42,6 +42,7 @@ const getHopliteStats = defineCachedFunction(async (uuid: string, username: stri
   )
 
   const scrapeRes = await scrapeJob.waitUntilFinished(statsQueueEvents)
+  console.log('Finished Scraping Stats')
 
   return scrapeRes
 }, {

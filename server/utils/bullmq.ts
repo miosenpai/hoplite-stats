@@ -35,6 +35,7 @@ const statsQueueEvents = new QueueEvents(QUEUE_NAME, {
 const statsWorker = new Worker<ScrapeJob, BrStats>(QUEUE_NAME, async (job) => {
   const bot = await useMineflayer()
 
+  console.log('Bot: /stats', job.data.username)
   bot.chat(`/stats ${job.data.username}`)
 
   const [statsMenu] = await once(bot, 'windowOpen') as [Window]
@@ -50,9 +51,11 @@ const statsWorker = new Worker<ScrapeJob, BrStats>(QUEUE_NAME, async (job) => {
   if (!brStatsBtn)
     throw Error('BR stats button not found.')
 
+  console.log('Bot: BR Stats Button Found')
   bot.simpleClick.leftMouse(brStatsBtn.slot)
 
   const [brStatsMenu] = await once(bot, 'windowOpen') as [Window<ItemWindowEvents>]
+  console.log('Bot: BR Stats Menu Opened')
 
   await new Promise<void>((resolve, reject) => {
     let pendingUpdates = 6
@@ -68,6 +71,8 @@ const statsWorker = new Worker<ScrapeJob, BrStats>(QUEUE_NAME, async (job) => {
     // todo: timeout protection (in case the # of items decreases/changes)
   })
 
+  console.log('Bot: Finished Waiting For Stats Items')
+
   const brStatsMenuItems = brStatsMenu.containerItems().map((item) => {
     return {
       customName: JSON.parse(item.customName!), // JSON.parse can handle null
@@ -79,6 +84,7 @@ const statsWorker = new Worker<ScrapeJob, BrStats>(QUEUE_NAME, async (job) => {
 
   const { scrapeBrStats } = useScrapeFunctions()
 
+  console.log('Bot: Parsing Stats Items')
   const statsRes = await scrapeBrStats(brStatsMenuItems)
 
   return statsRes
