@@ -6,7 +6,9 @@ type UsernameToUuidRes = {
 }
 
 function usernameToUuid(username: string) {
-  return $fetch<UsernameToUuidRes>(`https://api.mojang.com/users/profiles/minecraft/${username}`)
+  return $fetch.raw<UsernameToUuidRes>(`https://api.mojang.com/users/profiles/minecraft/${username}`, {
+    ignoreResponseError: true,
+  })
 }
 
 export function useMojangApi() {

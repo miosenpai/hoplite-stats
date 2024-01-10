@@ -5,13 +5,14 @@ export default defineEventHandler(async (event) => {
 
   const uuidRes = await mojangApi.usernameToUuid(username)
 
-  if (uuidRes.demo)
+  if (!uuidRes._data || uuidRes._data.demo) {
     throw createError({
       statusCode: 404,
-      statusMessage: 'This user does not own Minecraft.',
+      statusMessage: 'Failed to find Minecraft player.',
     })
+  }
 
-  const stats = await getHopliteStats(uuidRes.id, uuidRes.name)
+  const stats = await getHopliteStats(uuidRes._data.id, uuidRes._data.name)
 
   return stats
 })
