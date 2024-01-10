@@ -6,8 +6,9 @@ import IORedis from 'ioredis'
 
 const QUEUE_NAME = 'stats'
 
-type ScrapeJob = {
+export type ScrapeJob = {
   username: string
+  id: string
 }
 
 type CustomName = {
@@ -20,7 +21,7 @@ type ItemWindowEvents = {
   updateSlot: (slot: number, oldItem: Item, newItem: Item) => Promise<void> | void
 }
 
-const statsQueue = new Queue<ScrapeJob, BrStats>(QUEUE_NAME, {
+/* const statsQueue = new Queue<ScrapeJob, BrStats>(QUEUE_NAME, {
   connection: new IORedis(useRuntimeConfig().redisHost, {
     maxRetriesPerRequest: null,
   }),
@@ -30,13 +31,13 @@ const statsQueueEvents = new QueueEvents(QUEUE_NAME, {
   connection: new IORedis(useRuntimeConfig().redisHost, {
     maxRetriesPerRequest: null,
   }),
-})
+}) */
 
-const statsWorker = new Worker<ScrapeJob, BrStats>(QUEUE_NAME, async (job) => {
+export async function handleScrapeJob(job: ScrapeJob) {
   const bot = await useMineflayer()
 
-  console.log('Bot: /stats', job.data.username)
-  bot.chat(`/stats ${job.data.username}`)
+  console.log('Bot: /stats', job.username)
+  bot.chat(`/stats ${job.username}`)
 
   const [statsMenu] = await once(bot, 'windowOpen') as [Window]
 
@@ -88,7 +89,9 @@ const statsWorker = new Worker<ScrapeJob, BrStats>(QUEUE_NAME, async (job) => {
   const statsRes = await scrapeBrStats(brStatsMenuItems)
 
   return statsRes
-}, {
+}
+
+/* const statsWorker = new Worker<ScrapeJob, BrStats>(QUEUE_NAME, job => handleScrapeJob(job.data), {
   connection: new IORedis(useRuntimeConfig().redisHost, {
     maxRetriesPerRequest: null,
   }),
@@ -99,4 +102,4 @@ export function useStatsQueue() {
     statsQueue,
     statsQueueEvents,
   }
-}
+} */

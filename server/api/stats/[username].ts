@@ -17,8 +17,10 @@ export default defineEventHandler(async (event) => {
   const firstScrape = !(await cacheStore.hasItem(`nitro:functions:hoplite-stats:${uuidRes._data.id}.json`))
 
   if (firstScrape) {
+    const scrapeQueue = useScrapeQueue()
+    if (!scrapeQueue.getQueue().find(j => j.id === uuidRes._data?.id))
     // we use uuid as job key, this way we can't add duplicate scapes
-    getHopliteStats(uuidRes._data.id, uuidRes._data.name)
+      getHopliteStats(uuidRes._data.id, uuidRes._data.name)
     setResponseStatus(event, 202)
     return
   }
@@ -29,11 +31,13 @@ export default defineEventHandler(async (event) => {
 })
 
 const getHopliteStats = defineCachedFunction(async (uuid: string, username: string) => {
-  const { statsQueue, statsQueueEvents } = useStatsQueue()
+  // const { statsQueue, statsQueueEvents } = useStatsQueue()
+
+  const scrapeQueue = useScrapeQueue()
 
   console.log('Adding Job:', { uuid, username })
 
-  const scrapeJob = await statsQueue.add(
+  /* const scrapeJob = await statsQueue.add(
     'scrape',
     { username },
     {
@@ -41,11 +45,14 @@ const getHopliteStats = defineCachedFunction(async (uuid: string, username: stri
       removeOnComplete: true,
       jobId: uuid,
     },
-  )
+  ) */
 
-  console.log('Job Added')
+  // console.log('Job Added')
 
-  const scrapeRes = await scrapeJob.waitUntilFinished(statsQueueEvents)
+  // const scrapeRes = await scrapeJob.waitUntilFinished(statsQueueEvents)
+
+  const scrapeRes = await scrapeQueue.push({ username, id: uuid })
+
   console.log('Finished Scraping Stats')
 
   return scrapeRes
