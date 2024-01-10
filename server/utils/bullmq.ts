@@ -2,6 +2,7 @@ import { Worker, Queue, QueueEvents } from 'bullmq'
 import { once } from 'node:events'
 import type { Window } from 'prismarine-windows'
 import type { Item } from 'prismarine-item'
+import IORedis from 'ioredis'
 
 const QUEUE_NAME = 'stats'
 
@@ -19,9 +20,17 @@ type ItemWindowEvents = {
   updateSlot: (slot: number, oldItem: Item, newItem: Item) => Promise<void> | void
 }
 
-const statsQueue = new Queue<ScrapeJob, BrStats>(QUEUE_NAME)
+const statsQueue = new Queue<ScrapeJob, BrStats>(QUEUE_NAME, {
+  connection: new IORedis(useRuntimeConfig().redisHost, {
+    maxRetriesPerRequest: null,
+  }),
+})
 
-const statsQueueEvents = new QueueEvents(QUEUE_NAME)
+const statsQueueEvents = new QueueEvents(QUEUE_NAME, {
+  connection: new IORedis(useRuntimeConfig().redisHost, {
+    maxRetriesPerRequest: null,
+  }),
+})
 
 const statsWorker = new Worker<ScrapeJob, BrStats>(QUEUE_NAME, async (job) => {
   const bot = await useMineflayer()
@@ -74,8 +83,9 @@ const statsWorker = new Worker<ScrapeJob, BrStats>(QUEUE_NAME, async (job) => {
 
   return statsRes
 }, {
-  connection: {},
-  // removeOnComplete: { count: 0 },
+  connection: new IORedis(useRuntimeConfig().redisHost, {
+    maxRetriesPerRequest: null,
+  }),
 })
 
 export function useStatsQueue() {

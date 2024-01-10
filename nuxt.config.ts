@@ -12,6 +12,7 @@ export default defineNuxtConfig({
       serverHost: '',
       authName: '',
     },
+    redisHost: '',
   },
   modules: [
     '@nuxt/ui',
@@ -39,12 +40,6 @@ export default defineNuxtConfig({
     experimental: {
       // https://nitro.unjs.io/guide/utils#experimental-composition-api
       asyncContext: true,
-    },
-    storage: {},
-    devStorage: {
-      cache: {
-        driver: 'redis',
-      },
     },
   },
   typescript: {
