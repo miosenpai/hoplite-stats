@@ -62,8 +62,17 @@
     v-else
     :class="[prose, 'flex flex-col justify-center min-h-full']"
   >
-    <h1 class="text-center">
-      Error
+    <h1
+      v-if="error"
+      class="text-center"
+    >
+      Error: {{ error.statusCode }}
+    </h1>
+    <h1
+      v-else
+      class="text-center"
+    >
+      First time visit, please wait for stats to be collected then refresh.
     </h1>
   </UContainer>
 </template>
