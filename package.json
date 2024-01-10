@@ -11,6 +11,7 @@
     "lint": "eslint ."
   },
   "devDependencies": {
+    "@flydotio/dockerfile": "^0.5.0",
     "@fontsource-variable/dm-sans": "^5.0.3",
     "@iconify/json": "^2.2.166",
     "@nuxt/eslint-config": "^0.2.0",

@@ -1,7 +1,8 @@
 {
   // https://ui.nuxt.com/getting-started/installation
   "files.associations": {
-    "*.css": "tailwindcss"
+    "*.css": "tailwindcss",
+    "*docker-compose*": "yaml"
   },
   "editor.quickSuggestions": {
     "strings": true
