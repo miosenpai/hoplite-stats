@@ -1,8 +1,8 @@
 import mineflayer from 'mineflayer'
 
-let bot: mineflayer.Bot
+let bot: mineflayer.Bot | null = null
 
-let botActive = false
+// let botActive = false
 
 async function createNewBot() {
   const runtimeCfg = useRuntimeConfig()
@@ -13,6 +13,7 @@ async function createNewBot() {
     // bot.on('error', console.log)
     // hideErrors: false,
     auth: 'microsoft',
+    profilesFolder: runtimeCfg.bot.profilesDir || undefined,
   })
 
   newBot.on('resourcePack', () => {
@@ -42,7 +43,7 @@ async function createNewBot() {
       // make sure we are in actual server, not queue lobby
       if (connections == 2) {
         console.log('Bot Connected: Lobby')
-        botActive = true
+        // botActive = true
         newBot.removeAllListeners('spawn')
         newBot.removeAllListeners('end')
         resolve()
@@ -66,14 +67,17 @@ async function createNewBot() {
       clearTimeout(inactiveDc)
     console.log('Bot Disconnected:', reason)
     newBot.removeAllListeners()
-    botActive = false
+    // botActive = false
+    bot = null
   })
 
   return newBot
 }
 
 export async function useMineflayer() {
-  if (!botActive)
+  /* if (!botActive)
+    bot = await createNewBot() */
+  if (!bot)
     bot = await createNewBot()
 
   return bot

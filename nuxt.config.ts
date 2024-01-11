@@ -11,6 +11,7 @@ export default defineNuxtConfig({
       idleMinutes: 10,
       serverHost: '',
       authName: '',
+      profilesDir: '',
     },
     redisHost: '',
   },
