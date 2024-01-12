@@ -14,6 +14,7 @@ async function createNewBot() {
     // hideErrors: false,
     auth: 'microsoft',
     profilesFolder: runtimeCfg.bot.profilesDir || undefined,
+    version: '1.20.1',
   })
 
   newBot.on('resourcePack', () => {
