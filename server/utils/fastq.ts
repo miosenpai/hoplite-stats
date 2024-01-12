@@ -92,6 +92,7 @@ export async function handleScrapeJob(this: typeof queueCtx, job: ScrapeJob) {
 
 const queueCtx = {
   bot: null as null | mineflayer.Bot,
+  inactiveDc: null as null | NodeJS.Timeout,
   async initBot() {
     const runtimeCfg = useRuntimeConfig()
 
@@ -128,12 +129,15 @@ const queueCtx = {
       })
     })
 
+    this.inactiveDc = setTimeout(bot.quit, 3 * 60 * 1000)
+
     bot.once('end', this.onBotEnd)
 
     return bot
   },
   onBotEnd(reason: string) {
     console.log('Bot DC:', reason)
+    clearTimeout(this.inactiveDc!)
     this.bot?.removeAllListeners()
     this.bot = null
   },
