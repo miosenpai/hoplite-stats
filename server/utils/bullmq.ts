@@ -1,8 +1,7 @@
-import { Worker, Queue, QueueEvents } from 'bullmq'
 import { once } from 'node:events'
 import type { Window } from 'prismarine-windows'
 import type { Item } from 'prismarine-item'
-import IORedis from 'ioredis'
+import mineflayer from 'mineflayer'
 
 const QUEUE_NAME = 'stats'
 
@@ -34,7 +33,42 @@ const statsQueueEvents = new QueueEvents(QUEUE_NAME, {
 }) */
 
 export async function handleScrapeJob(job: ScrapeJob) {
-  const bot = await useMineflayer()
+  // const bot = await useMineflayer()
+
+  const runtimeCfg = useRuntimeConfig()
+
+  const bot = mineflayer.createBot({
+    username: runtimeCfg.bot.authName,
+    host: runtimeCfg.bot.serverHost,
+    auth: 'microsoft',
+    profilesFolder: runtimeCfg.bot.profilesDir || undefined,
+    version: '1.20.1',
+  })
+
+  bot.on('resourcePack', () => {
+    console.log('Resource Pack: Accepting')
+    bot.acceptResourcePack()
+  })
+
+  bot.on('kicked', console.log)
+  bot.on('error', console.log)
+
+  await new Promise<void>((resolve) => {
+    let conn = 0
+
+    bot.on('spawn', () => {
+      conn += 1
+
+      if (conn === 1)
+        console.log('Joined Queue')
+
+      if (conn === 2) {
+        console.log('Joined Lobby')
+        resolve()
+        bot.removeAllListeners('spawn')
+      }
+    })
+  })
 
   console.log('Bot: /stats', job.username)
   bot.chat(`/stats ${job.username}`)
@@ -87,6 +121,17 @@ export async function handleScrapeJob(job: ScrapeJob) {
 
   console.log('Bot: Parsing Stats Items')
   const statsRes = await scrapeBrStats(brStatsMenuItems)
+
+  bot.quit()
+
+  await new Promise<void>((resolve) => {
+    bot.once('end', (reason) => {
+      resolve()
+      console.log('DC:', reason)
+    })
+  })
+
+  bot.removeAllListeners()
 
   return statsRes
 }
