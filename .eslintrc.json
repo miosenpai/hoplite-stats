@@ -6,5 +6,8 @@
   "extends": [
     "plugin:@stylistic/recommended-extends",
     "@nuxt/eslint-config"
-  ]
+  ],
+  "rules": {
+    "@stylistic/brace-style": ["error", "1tbs", { "allowSingleLine": true }]
+  }
 }

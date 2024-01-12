@@ -77,8 +77,16 @@ async function createNewBot() {
 export async function useMineflayer() {
   /* if (!botActive)
     bot = await createNewBot() */
-  if (!bot)
+
+  if (!bot) {
+    if (global.gc) {
+      global.gc()
+    } else {
+      console.log('Warning: global.gc not exposed, cannot eagerly collect old bot')
+    }
+
     bot = await createNewBot()
+  }
 
   return bot
 }
