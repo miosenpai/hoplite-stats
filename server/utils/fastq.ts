@@ -21,6 +21,8 @@ type ItemWindowEvents = {
 
 export async function handleScrapeJob(this: typeof queueCtx, job: ScrapeJob) {
   // const bot = await useMineflayer()
+  console.log(this.bot)
+
   if (!this.bot)
     this.bot = await this.initBot()
 
@@ -131,12 +133,13 @@ const queueCtx = {
 
     this.inactiveDc = setTimeout(bot.quit, 3 * 60 * 1000)
 
-    bot.once('end', this.onBotEnd)
+    bot.once('end', reason => this.onBotEnd(reason))
 
     return bot
   },
   onBotEnd(reason: string) {
     console.log('Bot DC:', reason)
+    // console.log(this)
     clearTimeout(this.inactiveDc!)
     this.bot?.removeAllListeners()
     this.bot = null
