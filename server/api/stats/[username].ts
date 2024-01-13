@@ -1,8 +1,11 @@
-export default defineEventHandler(async (event) => {
+export default defineCachedEventHandler(async (event) => {
+  const runtimeCfg = useRuntimeConfig()
+
   const username = getRouterParam(event, 'username')!
 
   const mojangApi = useMojangApi()
 
+  // todo: investigate moving this after firstReq checks to eliminate the 2nd redundant req
   const uuidRes = await mojangApi.usernameToUuid(username)
 
   if (uuidRes.status === 404 || uuidRes._data!.demo) {
@@ -14,20 +17,54 @@ export default defineEventHandler(async (event) => {
 
   const cacheStore = useStorage('cache')
 
-  const firstScrape = !(await cacheStore.hasItem(`nitro:functions:hoplite-stats:${uuidRes._data!.id}.json`))
+  const firstReq = !(await cacheStore.hasItem(`nitro:functions:hoplite-stats:${uuidRes._data!.id}.json`))
 
-  if (firstScrape) {
-    const scrapeQueue = useScrapeQueue()
+  if (firstReq) {
+    /* const scrapeQueue = useScrapeQueue()
     if (!scrapeQueue.getQueue().find(j => j.id === uuidRes._data!.id))
     // we use uuid as job key, this way we can't add duplicate scapes
-      getHopliteStats(uuidRes._data!.id, uuidRes._data!.name)
+      getHopliteStats(uuidRes._data!.id, uuidRes._data!.name) */
+
+    $fetch(`/api/stats/${username}`, {
+      headers: {
+        'Internal-Req-Key': runtimeCfg.internalReqKey,
+      },
+    })
     setResponseStatus(event, 202)
     return
   }
 
-  const stats = await getHopliteStats(uuidRes._data!.id, uuidRes._data!.name)
+  /* const stats = await getHopliteStats(uuidRes._data!.id, uuidRes._data!.name)
 
-  return stats
+  return stats */
+
+  const scrapeQueue = useScrapeQueue()
+
+  try {
+    const scrapeRes = await scrapeQueue.push({ id: uuidRes._data!.id, username: uuidRes._data!.name })
+
+    return scrapeRes
+  } catch (err: any) {
+    // todo: finer error handling
+    throw createError({
+      statusCode: err.message === ScrapeError.NO_HOPLITE_PROFILE ? 404 : 500,
+    })
+  }
+}, {
+  name: 'hoplite-stats-route',
+  maxAge: dayjs.duration(12, 'hours').asSeconds(),
+  getKey: (event) => {
+    return getRouterParam(event, 'username')!
+  },
+  shouldInvalidateCache: (event) => {
+    const incomingReqKey = getRequestHeader(event, 'Internal-Req-Key')
+    const runtimeCfg = useRuntimeConfig()
+
+    if (incomingReqKey && incomingReqKey === runtimeCfg.internalReqKey)
+      return true
+
+    return false
+  },
 })
 
 const getHopliteStats = defineCachedFunction(async (uuid: string, username: string) => {

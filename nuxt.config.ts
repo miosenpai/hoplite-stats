@@ -13,6 +13,7 @@ export default defineNuxtConfig({
       authName: '',
     },
     redisHost: '',
+    internalReqKey: '',
   },
   modules: [
     '@nuxt/ui',
