@@ -3,6 +3,7 @@ import type { Window } from 'prismarine-windows'
 import type { Item } from 'prismarine-item'
 import mineflayer from 'mineflayer'
 import fastq from 'fastq'
+import type { ChatMessage } from 'prismarine-chat'
 
 export type ScrapeJob = {
   username: string
@@ -15,6 +16,10 @@ type CustomName = {
   text: string
 }
 
+export enum ScrapeError {
+  NO_HOPLITE_PROFILE = 'NO_HOPLITE_PROFILE',
+}
+
 type ItemWindowEvents = {
   updateSlot: (slot: number, oldItem: Item, newItem: Item) => Promise<void> | void
 }
@@ -22,11 +27,30 @@ type ItemWindowEvents = {
 export async function handleScrapeJob(this: typeof queueCtx, job: ScrapeJob) {
   if (!this.bot)
     this.bot = await this.initBot()
+  else
+    this.inactiveDc!.refresh()
 
   console.log('Bot: /stats', job.username)
   this.bot.chat(`/stats ${job.username}`)
 
-  const [statsMenu] = await once(this.bot, 'windowOpen') as [Window]
+  const statsMenu = await new Promise<Window>((resolve, reject) => {
+    const onWindowOpen = (window: Window) => {
+      this.bot!.removeListener('message', onErrorMsg)
+      resolve(window)
+    }
+    const onErrorMsg = (jsonMsg: ChatMessage, position: string) => {
+      if (position === 'system' && jsonMsg.extra?.at(1)?.toString().endsWith('An unexpected error occurred. Please try again later!')) {
+        this.bot!.removeListener('windowOpen', onWindowOpen)
+        this.bot!.removeListener('message', onErrorMsg)
+        reject(ScrapeError.NO_HOPLITE_PROFILE)
+      }
+    }
+
+    this.bot!.once('windowOpen', onWindowOpen)
+    this.bot!.on('message', onErrorMsg)
+  })
+
+  // const [statsMenu] = await once(this.bot, 'windowOpen') as [Window]
 
   const brStatsBtn = statsMenu.containerItems().find((item) => {
     if (item.customName) {
@@ -126,7 +150,7 @@ const queueCtx = {
         }
       })
 
-      bot.on('end', (reason) => {
+      bot.once('end', (reason) => {
         console.log('Bot Failed To Connect:', reason)
         bot.removeAllListeners()
         reject()
@@ -145,7 +169,7 @@ const queueCtx = {
   onBotEnd(reason: string) {
     console.log('Bot DC:', reason)
     clearTimeout(this.inactiveDc!)
-    this.bot?.removeAllListeners()
+    this.bot!.removeAllListeners()
     this.bot = null
   },
 }

@@ -5,7 +5,7 @@ export default defineEventHandler(async (event) => {
 
   const uuidRes = await mojangApi.usernameToUuid(username)
 
-  if (!uuidRes._data || uuidRes._data.demo) {
+  if (uuidRes.status === 404 || uuidRes._data!.demo) {
     throw createError({
       statusCode: 404,
       statusMessage: 'Failed to find Minecraft player.',
@@ -14,18 +14,18 @@ export default defineEventHandler(async (event) => {
 
   const cacheStore = useStorage('cache')
 
-  const firstScrape = !(await cacheStore.hasItem(`nitro:functions:hoplite-stats:${uuidRes._data.id}.json`))
+  const firstScrape = !(await cacheStore.hasItem(`nitro:functions:hoplite-stats:${uuidRes._data!.id}.json`))
 
   if (firstScrape) {
     const scrapeQueue = useScrapeQueue()
-    if (!scrapeQueue.getQueue().find(j => j.id === uuidRes._data?.id))
+    if (!scrapeQueue.getQueue().find(j => j.id === uuidRes._data!.id))
     // we use uuid as job key, this way we can't add duplicate scapes
-      getHopliteStats(uuidRes._data.id, uuidRes._data.name)
+      getHopliteStats(uuidRes._data!.id, uuidRes._data!.name)
     setResponseStatus(event, 202)
     return
   }
 
-  const stats = await getHopliteStats(uuidRes._data.id, uuidRes._data.name)
+  const stats = await getHopliteStats(uuidRes._data!.id, uuidRes._data!.name)
 
   return stats
 })
