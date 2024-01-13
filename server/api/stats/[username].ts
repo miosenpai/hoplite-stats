@@ -1,3 +1,5 @@
+type StatsResType = BrStats & { pending?: true }
+
 export default defineCachedEventHandler(async (event) => {
   const runtimeCfg = useRuntimeConfig()
 
@@ -17,9 +19,10 @@ export default defineCachedEventHandler(async (event) => {
 
   const cacheStore = useStorage('cache')
 
-  const firstReq = !(await cacheStore.hasItem(`nitro:functions:hoplite-stats:${uuidRes._data!.id}.json`))
+  // const firstReq = !(await cacheStore.hasItem(`nitro:functions:hoplite-stats:${uuidRes._data!.id}.json`))
+  const firstReq = !(await cacheStore.hasItem(`nitro:handlers:hoplite-stats-route:${uuidRes._data!.id}.json`))
 
-  if (firstReq) {
+  if (firstReq && !isInternalReq()) {
     /* const scrapeQueue = useScrapeQueue()
     if (!scrapeQueue.getQueue().find(j => j.id === uuidRes._data!.id))
     // we use uuid as job key, this way we can't add duplicate scapes
@@ -30,8 +33,8 @@ export default defineCachedEventHandler(async (event) => {
         'Internal-Req-Key': runtimeCfg.internalReqKey,
       },
     })
-    setResponseStatus(event, 202)
-    return
+    // body must not be empty in order to nitro to cache
+    return { pending: true } as StatsResType
   }
 
   /* const stats = await getHopliteStats(uuidRes._data!.id, uuidRes._data!.name)
@@ -43,7 +46,7 @@ export default defineCachedEventHandler(async (event) => {
   try {
     const scrapeRes = await scrapeQueue.push({ id: uuidRes._data!.id, username: uuidRes._data!.name })
 
-    return scrapeRes
+    return scrapeRes as StatsResType
   } catch (err: any) {
     // todo: finer error handling
     throw createError({
@@ -56,14 +59,8 @@ export default defineCachedEventHandler(async (event) => {
   getKey: (event) => {
     return getRouterParam(event, 'username')!
   },
-  shouldInvalidateCache: (event) => {
-    const incomingReqKey = getRequestHeader(event, 'Internal-Req-Key')
-    const runtimeCfg = useRuntimeConfig()
-
-    if (incomingReqKey && incomingReqKey === runtimeCfg.internalReqKey)
-      return true
-
-    return false
+  shouldInvalidateCache: () => {
+    return isInternalReq()
   },
 })
 
