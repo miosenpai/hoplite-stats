@@ -20,9 +20,6 @@ type ItemWindowEvents = {
 }
 
 export async function handleScrapeJob(this: typeof queueCtx, job: ScrapeJob) {
-  // const bot = await useMineflayer()
-  // console.log(this.bot)
-
   if (!this.bot)
     this.bot = await this.initBot()
 
@@ -78,17 +75,6 @@ export async function handleScrapeJob(this: typeof queueCtx, job: ScrapeJob) {
   console.log('Bot: Parsing Stats Items')
   const statsRes = await scrapeBrStats(brStatsMenuItems)
 
-  /* bot.quit()
-
-  await new Promise<void>((resolve) => {
-    bot.once('end', (reason) => {
-      resolve()
-      console.log('DC:', reason)
-    })
-  })
-
-  bot.removeAllListeners() */
-
   return statsRes
 }
 
@@ -114,24 +100,37 @@ const queueCtx = {
     bot.on('kicked', console.log)
     bot.on('error', console.log)
 
-    await new Promise<void>((resolve) => {
+    await new Promise<void>((resolve, reject) => {
       let conn = 0
+
+      if (runtimeCfg.bot.serverHost !== 'hoplite.gg')
+        conn += 1
 
       bot.on('spawn', () => {
         conn += 1
 
         if (conn === 1)
-          console.log('Joined Queue')
+          console.log('Bot Connected: Queue')
 
         if (conn === 2) {
-          console.log('Joined Lobby')
-          resolve()
+          console.log('Bot Connected: Lobby')
           bot.removeAllListeners('spawn')
+          bot.removeAllListeners('end')
+          resolve()
         }
+      })
+
+      bot.on('end', (reason) => {
+        console.log('Bot Failed To Connect:', reason)
+        bot.removeAllListeners()
+        reject()
       })
     })
 
-    this.inactiveDc = setTimeout(bot.quit, 3 * 60 * 1000)
+    this.inactiveDc = setTimeout(
+      bot.quit,
+      dayjs.duration(runtimeCfg.bot.idleMinutes, 'minutes').asMilliseconds(),
+    )
 
     // todo: clean up `this` usage
     bot.once('end', reason => this.onBotEnd(reason))

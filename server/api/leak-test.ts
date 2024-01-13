@@ -1,5 +1,4 @@
 import mineflayer from 'mineflayer'
-import { once } from 'node:events'
 
 export default defineEventHandler(async () => {
   const runtimeCfg = useRuntimeConfig()
