@@ -81,7 +81,7 @@ export async function handleScrapeJob(this: typeof queueCtx, job: ScrapeJob) {
 const queueCtx = {
   bot: null as null | mineflayer.Bot,
   inactiveDc: null as null | NodeJS.Timeout,
-  authCache: null as null | ReturnType<typeof createAuthCache>,
+  authCache: new Map<string, ReturnType<typeof createAuthCache>>(),
   async initBot() {
     const runtimeCfg = useRuntimeConfig()
 
@@ -90,10 +90,10 @@ const queueCtx = {
       host: runtimeCfg.bot.serverHost,
       auth: 'microsoft',
       // @ts-ignore
-      profilesFolder: (authCacheOpts: Parameter<typeof createAuthCache>[0]) => {
-        if (!this.authCache)
-          this.authCache = createAuthCache(authCacheOpts)
-        return this.authCache
+      profilesFolder: (authCacheOpts: Parameters<typeof createAuthCache>[0]) => {
+        if (!this.authCache.has(authCacheOpts.cacheName))
+          this.authCache.set(authCacheOpts.cacheName, createAuthCache(authCacheOpts))
+        return this.authCache.get(authCacheOpts.cacheName)
       },
       version: '1.20.1',
     })

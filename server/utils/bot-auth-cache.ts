@@ -8,7 +8,7 @@ with Redis as the backing storage.
 
 export function createAuthCache({ cacheName, username }: { cacheName: string, username: string }) {
   const authCache = {
-    cacheKey: `bot-session:${cacheName}:${username}`,
+    cacheKey: `bot-session:${username}:${cacheName}`,
     cacheStore: useStorage('cache'),
     cached: null as any,
     async loadInitialValue() {
