@@ -41,16 +41,28 @@ export type ClassStatsFields = {
 
 export type BrStats = OverallStatsFields & ClassStatsFields
 
+function parsePlaytime(playtimeStr: string) {
+  const playtimeStrArr = playtimeStr.split(':')
+  return dayjs.duration({
+    days: parseInt(playtimeStrArr[0]),
+    hours: parseInt(playtimeStrArr[1]),
+    minutes: parseInt(playtimeStrArr[2]),
+    seconds: parseInt(playtimeStrArr[3]),
+  }).asSeconds()
+}
+
 const classStatsQuery = jsonata(`$[customName.text = $classNameText]{
   'wins': $number(customLore[text = 'Wins: '].extra.text),
   'losses': $number(customLore[text = 'Losses: '].extra.text),
   'kills': $number(customLore[text = 'Kills: '].extra.text),
   'deaths': $number(customLore[text = 'Deaths: '].extra.text),
   'assists': $number(customLore[text = 'Assists: '].extra.text),
-  'playtime': customLore[text = 'Playtime: '].extra.text,
+  'playtime': $parsePlaytime(customLore[text = 'Playtime: '].extra.text),
   'winLoseRatio': $number(customLore[text = 'W/L Ratio: '].extra.text),
   'killDeathRatio': $number(customLore[text = 'K/D Ratio: '].extra.text)
 }`)
+
+classStatsQuery.assign('parsePlaytime', parsePlaytime)
 
 const overallStatsQuery = jsonata(`$[customName.text = 'Overall Stats']{
   'total': {
@@ -58,26 +70,28 @@ const overallStatsQuery = jsonata(`$[customName.text = 'Overall Stats']{
     'wins': $number(customLore[text = 'Total Wins: '].extra.text),
     'kills': $number(customLore[text = 'Total Kills: '].extra.text),
     'assists': $number(customLore[text = 'Total Assists: '].extra.text),
-    'playtime': customLore[text = 'Total Playtime: '].extra.text
+    'playtime': $parsePlaytime(customLore[text = 'Total Playtime: '].extra.text)
   },
   'solo': {
     'games': $number(customLore[text = 'Solo Games Played: '].extra.text),
     'wins': $number(customLore[text = 'Solo Wins: '].extra.text),
     'kills': $number(customLore[text = 'Solo Kills: '].extra.text),
     'assists': $number(customLore[text = 'Solo Assists: '].extra.text),
-    'playtime': customLore[text = 'Solo Playtime: '].extra.text
+    'playtime': $parsePlaytime(customLore[text = 'Solo Playtime: '].extra.text)
   },
   'civ': {
     'games': $number(customLore[text = 'Civ Games Played: '].extra.text),
     'wins': $number(customLore[text = 'Civ Wins: '].extra.text),
     'kills': $number(customLore[text = 'Civ Kills: '].extra.text),
     'assists': $number(customLore[text = 'Civ Assists: '].extra.text),
-    'playtime': customLore[text = 'Civ Playtime: '].extra.text
+    'playtime': $parsePlaytime(customLore[text = 'Civ Playtime: '].extra.text)
   },
   'legendaryCrafts': $number(customLore[text = 'Legendary Weapons Crafted: '].extra.text),
   'legendaryKills': $number(customLore[text = 'Legendary Weapon Kills: '].extra.text),
-  'avgTimeSurvived': customLore[text = 'Average Time Survived: '].extra.text
+  'avgTimeSurvived': $parsePlaytime(customLore[text = 'Average Time Survived: '].extra.text)
 }`)
+
+overallStatsQuery.assign('parsePlaytime', parsePlaytime)
 
 function scrapeClassStats(brStatsItems: any, className: string) {
   return classStatsQuery.evaluate(brStatsItems, { classNameText: `${className} Stats` }) as Promise<ClassStats>
