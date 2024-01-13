@@ -88,7 +88,8 @@ const queueCtx = {
       username: runtimeCfg.bot.authName,
       host: runtimeCfg.bot.serverHost,
       auth: 'microsoft',
-      profilesFolder: runtimeCfg.bot.profilesDir || undefined,
+      // @ts-ignore
+      profilesFolder: createAuthCache,
       version: '1.20.1',
     })
 
@@ -128,18 +129,16 @@ const queueCtx = {
     })
 
     this.inactiveDc = setTimeout(
-      bot.quit,
+      () => bot.quit(),
       dayjs.duration(runtimeCfg.bot.idleMinutes, 'minutes').asMilliseconds(),
     )
 
-    // todo: clean up `this` usage
     bot.once('end', reason => this.onBotEnd(reason))
 
     return bot
   },
   onBotEnd(reason: string) {
     console.log('Bot DC:', reason)
-    // console.log(this)
     clearTimeout(this.inactiveDc!)
     this.bot?.removeAllListeners()
     this.bot = null
