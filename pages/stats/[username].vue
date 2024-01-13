@@ -33,7 +33,8 @@
     <div
       :class="[
         'grid grid-cols-2',
-        'gap-6'
+        'gap-6',
+        'pb-6'
       ]"
     >
       <ClassStatsPanel
