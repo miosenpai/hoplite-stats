@@ -34,7 +34,7 @@
       <StatRow
         icon="i-mdi-clock-outline"
         name="Playtime"
-        :value="props.solo.playtime"
+        :value="formatPlaytime(props.solo.playtime)"
       />
     </div>
     <div class="flex flex-col gap-0.5">
@@ -64,7 +64,7 @@
       <StatRow
         icon="i-mdi-clock-outline"
         name="Playtime"
-        :value="props.civ.playtime"
+        :value="formatPlaytime(props.civ.playtime)"
       />
     </div>
     <div class="flex flex-col gap-0.5">
@@ -84,7 +84,7 @@
       <StatRow
         icon="i-mdi-clock-outline"
         name="Avg Time Alive"
-        :value="props.avgTimeSurvived"
+        :value="formatPlaytime(props.avgTimeSurvived)"
       />
     </div>
   </UCard>

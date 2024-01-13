@@ -38,7 +38,7 @@
     <StatRow
       icon="i-mdi-clock-outline"
       name="Playtime"
-      :value="props.playtime"
+      :value="formatPlaytime(props.playtime)"
     />
   </UCard>
 </template>

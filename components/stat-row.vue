@@ -6,10 +6,10 @@
   </p>
 </template>
 
-<script setup lang="ts">
+<script setup lang="ts" generic="T">
 const props = defineProps<{
   icon: string
   name: string
-  value: string | number
+  value: T
 }>()
 </script>
