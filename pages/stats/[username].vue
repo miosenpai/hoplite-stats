@@ -1,22 +1,5 @@
 <template>
-  <UContainer
-    v-if="!statsData || statsData.pending"
-    :class="[prose, 'flex flex-col justify-center min-h-full']"
-  >
-    <h1
-      v-if="error"
-      class="text-center"
-    >
-      Error: {{ error.statusCode }}
-    </h1>
-    <h1
-      v-if="statsData?.pending"
-      class="text-center"
-    >
-      First time visit, please wait for stats to be collected then refresh.
-    </h1>
-  </UContainer>
-  <UContainer v-else>
+  <UContainer v-if="statsData">
     <div
       class="flex justify-between items-center py-4"
       :class="[prose, 'max-w-none']"
@@ -75,6 +58,23 @@
         class-name="Looter"
       />
     </div>
+  </UContainer>
+  <UContainer
+    v-else
+    :class="[prose, 'flex flex-col justify-center min-h-full']"
+  >
+    <h1
+      v-if="error"
+      class="text-center"
+    >
+      Error: {{ error.statusCode }}
+    </h1>
+    <h1
+      v-else
+      class="text-center"
+    >
+      First time visit, please wait for stats to be collected then refresh.
+    </h1>
   </UContainer>
 </template>
 

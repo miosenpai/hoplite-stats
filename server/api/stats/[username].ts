@@ -1,13 +1,9 @@
-type StatsResType = BrStats & { pending?: true }
-
-export default defineCachedEventHandler(async (event) => {
-  const runtimeCfg = useRuntimeConfig()
-
+export default defineEventHandler(async (event) => {
   const username = getRouterParam(event, 'username')!
 
   const mojangApi = useMojangApi()
 
-  const uuidRes = event.context.uuidObj as Awaited<ReturnType<typeof mojangApi.usernameToUuid>>
+  const uuidRes = await mojangApi.usernameToUuid(username)
 
   if (uuidRes.status === 404 || uuidRes._data!.demo) {
     throw createError({
@@ -18,51 +14,20 @@ export default defineCachedEventHandler(async (event) => {
 
   const cacheStore = useStorage('cache')
 
-  // const firstReq = !(await cacheStore.hasItem(`nitro:functions:hoplite-stats:${uuidRes._data!.id}.json`))
-  const firstReq = !(await cacheStore.hasItem(`nitro:handlers:hoplite-stats-route:${uuidRes._data!.id}.json`))
+  const firstScrape = !(await cacheStore.hasItem(`nitro:functions:hoplite-stats:${uuidRes._data!.id}.json`))
 
-  if (firstReq && !isInternalReq()) {
-    /* const scrapeQueue = useScrapeQueue()
+  if (firstScrape) {
+    const scrapeQueue = useScrapeQueue()
     if (!scrapeQueue.getQueue().find(j => j.id === uuidRes._data!.id))
     // we use uuid as job key, this way we can't add duplicate scapes
-      getHopliteStats(uuidRes._data!.id, uuidRes._data!.name) */
-    $fetch(`/api/stats/${username}`, {
-      headers: {
-        'Internal-Req-Key': runtimeCfg.internalReqKey,
-      },
-    })
-    // body must not be empty in order to nitro to cache
-    return { pending: true } as StatsResType
+      getHopliteStats(uuidRes._data!.id, uuidRes._data!.name)
+    setResponseStatus(event, 202)
+    return
   }
 
-  /* const stats = await getHopliteStats(uuidRes._data!.id, uuidRes._data!.name)
+  const stats = await getHopliteStats(uuidRes._data!.id, uuidRes._data!.name)
 
-  return stats */
-
-  const scrapeQueue = useScrapeQueue()
-
-  try {
-    const scrapeRes = await scrapeQueue.push({ id: uuidRes._data!.id, username: uuidRes._data!.name })
-
-    return scrapeRes as StatsResType
-  } catch (err: any) {
-    // todo: finer error handling
-    throw createError({
-      statusCode: err.message === ScrapeError.NO_HOPLITE_PROFILE ? 404 : 500,
-    })
-  }
-}, {
-  name: 'hoplite-stats-route',
-  maxAge: dayjs.duration(12, 'hours').asSeconds(),
-  getKey: (event) => {
-    const mojangApi = useMojangApi()
-    const uuidRes = event.context.uuidObj as Awaited<ReturnType<typeof mojangApi.usernameToUuid>>
-
-    return uuidRes._data?.id!
-  },
-  shouldInvalidateCache: () => {
-    return isInternalReq()
-  },
+  return stats
 })
 
 const getHopliteStats = defineCachedFunction(async (uuid: string, username: string) => {
