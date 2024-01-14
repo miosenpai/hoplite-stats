@@ -16,10 +16,6 @@ type CustomName = {
   text: string
 }
 
-export enum ScrapeError {
-  NO_HOPLITE_PROFILE = 'NO_HOPLITE_PROFILE',
-}
-
 type ItemWindowEvents = {
   updateSlot: (slot: number, oldItem: Item, newItem: Item) => Promise<void> | void
 }
@@ -42,7 +38,7 @@ export async function handleScrapeJob(this: typeof queueCtx, job: ScrapeJob) {
       if (position === 'system' && jsonMsg.extra?.at(1)?.toString().endsWith('An unexpected error occurred. Please try again later!')) {
         this.bot!.removeListener('windowOpen', onWindowOpen)
         this.bot!.removeListener('message', onErrorMsg)
-        reject(ScrapeError.NO_HOPLITE_PROFILE)
+        reject(Error(ScrapeError.NO_HOPLITE_PROFILE))
       }
     }
 

@@ -8,7 +8,7 @@ export default defineEventHandler(async (event) => {
   if (uuidRes.status === 404 || uuidRes._data!.demo) {
     throw createError({
       statusCode: 404,
-      statusMessage: 'Failed to find Minecraft player.',
+      statusMessage: ScrapeError.INVALID_USERNAME,
     })
   }
 
@@ -26,36 +26,30 @@ export default defineEventHandler(async (event) => {
   }
 
   const stats = await getHopliteStats(uuidRes._data!.id, uuidRes._data!.name)
-
-  return stats
+  if ('err' in stats) {
+    throw createError({
+      statusCode: [ScrapeError.NO_HOPLITE_PROFILE].includes(stats.err) ? 404 : 500,
+      message: Object.values(ScrapeError).includes(stats.err) ? stats.err : UNKNOWN_ERROR,
+    })
+  } else {
+    return stats
+  }
 })
 
 const getHopliteStats = defineCachedFunction(async (uuid: string, username: string) => {
-  // const { statsQueue, statsQueueEvents } = useStatsQueue()
-
   const scrapeQueue = useScrapeQueue()
 
   console.log('Adding Job:', { uuid, username })
 
-  /* const scrapeJob = await statsQueue.add(
-    'scrape',
-    { username },
-    {
-      removeOnFail: true,
-      removeOnComplete: true,
-      jobId: uuid,
-    },
-  ) */
+  try {
+    const scrapeRes = await scrapeQueue.push({ username, id: uuid })
+    console.log('Finished Scraping Stats')
 
-  // console.log('Job Added')
-
-  // const scrapeRes = await scrapeJob.waitUntilFinished(statsQueueEvents)
-
-  const scrapeRes = await scrapeQueue.push({ username, id: uuid })
-
-  console.log('Finished Scraping Stats')
-
-  return scrapeRes
+    return scrapeRes
+  } catch (err: any) { // must catch here, if defineCachedFunction errors it will infinitely return a cached res
+    console.log(err)
+    return { err: err.message }
+  }
 }, {
   // todo: figure out a good cache duration for stats
   maxAge: dayjs.duration(12, 'hours').asSeconds(),
