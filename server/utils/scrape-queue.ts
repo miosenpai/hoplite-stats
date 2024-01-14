@@ -57,7 +57,7 @@ class ScrapeBot {
     console.log('Bot: /stats', job.username)
     bot.chat(`/stats ${job.username}`)
 
-    const statsMenu = await new Promise<Window>((resolve, reject) => {
+    /* const statsMenu = await new Promise<Window>((resolve, reject) => {
       const onWindowOpen = (window: Window) => {
         bot.removeListener('message', onErrorMsg)
         resolve(window)
@@ -73,7 +73,9 @@ class ScrapeBot {
 
       bot.once('windowOpen', onWindowOpen)
       bot.on('message', onErrorMsg)
-    })
+    }) */
+
+    const [statsMenu] = await once(bot, 'windowOpen') as [Window]
 
     const brStatsBtn = statsMenu.containerItems().find((item) => {
       if (item.customName) {
