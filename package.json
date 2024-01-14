@@ -9,7 +9,7 @@
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
     "lint": "eslint .",
-    "start": "node --expose-gc .output/server/index.mjs"
+    "start": "node .output/server/index.mjs"
   },
   "engines": {
     "node": "18.x"
