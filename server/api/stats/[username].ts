@@ -8,7 +8,7 @@ export default defineEventHandler(async (event) => {
   if (uuidRes.status === 404 || uuidRes._data!.demo) {
     throw createError({
       statusCode: 404,
-      statusMessage: ScrapeError.INVALID_USERNAME,
+      message: ScrapeError.INVALID_USERNAME,
     })
   }
 
