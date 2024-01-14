@@ -4,7 +4,7 @@ import type { Window } from 'prismarine-windows'
 import type { Item } from 'prismarine-item'
 import type { ChatMessage } from 'prismarine-chat'
 import { once } from 'node:events'
-import fastq, { queueAsPromised } from 'fastq'
+import fastq, { type queueAsPromised } from 'fastq'
 
 type CustomName = {
   italic: boolean
