@@ -7,8 +7,7 @@ export default defineCachedEventHandler(async (event) => {
 
   const mojangApi = useMojangApi()
 
-  // todo: investigate moving this after firstReq checks to eliminate the 2nd redundant req
-  const uuidRes = await mojangApi.usernameToUuid(username)
+  const uuidRes = event.context.uuidObj as Awaited<ReturnType<typeof mojangApi.usernameToUuid>>
 
   if (uuidRes.status === 404 || uuidRes._data!.demo) {
     throw createError({
@@ -27,7 +26,6 @@ export default defineCachedEventHandler(async (event) => {
     if (!scrapeQueue.getQueue().find(j => j.id === uuidRes._data!.id))
     // we use uuid as job key, this way we can't add duplicate scapes
       getHopliteStats(uuidRes._data!.id, uuidRes._data!.name) */
-
     $fetch(`/api/stats/${username}`, {
       headers: {
         'Internal-Req-Key': runtimeCfg.internalReqKey,
@@ -57,7 +55,10 @@ export default defineCachedEventHandler(async (event) => {
   name: 'hoplite-stats-route',
   maxAge: dayjs.duration(12, 'hours').asSeconds(),
   getKey: (event) => {
-    return getRouterParam(event, 'username')!
+    const mojangApi = useMojangApi()
+    const uuidRes = event.context.uuidObj as Awaited<ReturnType<typeof mojangApi.usernameToUuid>>
+
+    return uuidRes._data?.id!
   },
   shouldInvalidateCache: () => {
     return isInternalReq()
