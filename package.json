@@ -12,7 +12,7 @@
     "start": "node .output/server/index.mjs"
   },
   "engines": {
-    "node": "20.x"
+    "node": "18.x"
   },
   "devDependencies": {
     "@fontsource-variable/dm-sans": "^5.0.3",
