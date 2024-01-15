@@ -12,7 +12,7 @@
     "start": "node .output/server/index.mjs"
   },
   "engines": {
-    "node": "18.x"
+    "node": "20.x"
   },
   "devDependencies": {
     "@fontsource-variable/dm-sans": "^5.0.3",
@@ -24,7 +24,7 @@
     "eslint": "^8.56.0",
     "fastq": "^1.16.0",
     "jsonata": "^2.0.3",
-    "mineflayer": "^4.17.0",
+    "mineflayer": "^4.18.0",
     "nuxt": "^3.9.0",
     "typescript": "^5.3.3",
     "vue": "^3.4.0",
