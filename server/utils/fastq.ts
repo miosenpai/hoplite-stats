@@ -144,12 +144,21 @@ const queueCtx = {
           break
         }
       }
+
+      bot.removeAllListeners('end')
+
+      this.inactiveDc = setTimeout(
+        () => bot.quit(),
+        dayjs.duration(runtimeCfg.bot.idleMinutes, 'minutes').asMilliseconds(),
+      )
+
+      bot.once('end', reason => this.onBotEnd(reason))
+
+      return bot
     } catch (err) {
       bot.removeAllListeners()
       throw err
     }
-
-    bot.removeAllListeners('end')
 
     /* await new Promise<void>((resolve, reject) => {
       let conn = 0
@@ -177,15 +186,6 @@ const queueCtx = {
         reject()
       })
     }) */
-
-    this.inactiveDc = setTimeout(
-      () => bot.quit(),
-      dayjs.duration(runtimeCfg.bot.idleMinutes, 'minutes').asMilliseconds(),
-    )
-
-    bot.once('end', reason => this.onBotEnd(reason))
-
-    return bot
   },
   onBotEnd(reason: string) {
     console.log('Bot DC:', reason)
