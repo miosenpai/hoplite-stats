@@ -1,4 +1,4 @@
-import { once } from 'node:events'
+import { once, on } from 'node:events'
 import type { Window } from 'prismarine-windows'
 import type { Item } from 'prismarine-item'
 import mineflayer from 'mineflayer'
@@ -29,7 +29,7 @@ export async function handleScrapeJob(this: typeof queueCtx, job: ScrapeJob) {
   console.log('Bot: /stats', job.username)
   this.bot.chat(`/stats ${job.username}`)
 
-  const statsMenu = await new Promise<Window>((resolve, reject) => {
+  /* const statsMenu = await new Promise<Window>((resolve, reject) => {
     const onWindowOpen = (window: Window) => {
       this.bot!.removeListener('message', onErrorMsg)
       resolve(window)
@@ -44,9 +44,9 @@ export async function handleScrapeJob(this: typeof queueCtx, job: ScrapeJob) {
 
     this.bot!.once('windowOpen', onWindowOpen)
     this.bot!.on('message', onErrorMsg)
-  })
+  }) */
 
-  // const [statsMenu] = await once(this.bot, 'windowOpen') as [Window]
+  const [statsMenu] = await once(this.bot, 'windowOpen') as [Window]
 
   const brStatsBtn = statsMenu.containerItems().find((item) => {
     if (item.customName) {
@@ -126,7 +126,32 @@ const queueCtx = {
     bot.on('kicked', console.log)
     bot.on('error', console.log)
 
-    await new Promise<void>((resolve, reject) => {
+    let connections = runtimeCfg.bot.serverHost === 'hoplite.gg' ? 0 : 1
+
+    const ac = new AbortController()
+
+    bot.once('end', reason => ac.abort(reason))
+
+    try {
+      for await (const _ of on(bot, 'spawn', { signal: ac.signal })) {
+        connections += 1
+
+        if (connections === 1)
+          console.log('Bot Connected: Queue')
+
+        if (connections === 2) {
+          console.log('Bot Connected: Lobby')
+          break
+        }
+      }
+    } catch (err) {
+      bot.removeAllListeners()
+      throw err
+    }
+
+    bot.removeAllListeners('end')
+
+    /* await new Promise<void>((resolve, reject) => {
       let conn = 0
 
       if (runtimeCfg.bot.serverHost !== 'hoplite.gg')
@@ -151,7 +176,7 @@ const queueCtx = {
         bot.removeAllListeners()
         reject()
       })
-    })
+    }) */
 
     this.inactiveDc = setTimeout(
       () => bot.quit(),
