@@ -91,7 +91,7 @@
 </template>
 
 <script setup lang="ts">
-import type { BrStats } from '@/server/utils/scrape'
+import type { BattleRoyaleStats } from '@/server/utils/scrape-functions/battle-royale'
 
-const props = defineProps<BrStats>()
+const props = defineProps<BattleRoyaleStats>()
 </script>

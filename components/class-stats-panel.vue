@@ -44,7 +44,7 @@
 </template>
 
 <script setup lang="ts">
-import type { ClassStats } from '@/server/utils/scrape'
+import type { ClassStats } from '@/server/utils/scrape-functions/battle-royale'
 
 const props = defineProps<ClassStats & { className: string }>()
 </script>

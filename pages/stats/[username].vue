@@ -79,11 +79,13 @@
 </template>
 
 <script setup lang="ts">
+import type { BattleRoyaleStats } from '@/server/utils/scrape-functions/battle-royale'
+
 const route = useRoute()
 
 const username = route.params.username
 
-const { data: statsData, error } = await useFetch(`/api/stats/${username}`)
+const { data: statsData, error } = await useFetch<BattleRoyaleStats>(`/api/stats/${username}`)
 
 const gameModes = ['Battle Royale', 'Duels']
 

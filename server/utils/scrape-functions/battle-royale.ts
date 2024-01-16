@@ -39,17 +39,7 @@ export type ClassStatsFields = {
   looter: ClassStats
 }
 
-export type BrStats = OverallStatsFields & ClassStatsFields
-
-function parsePlaytime(playtimeStr: string) {
-  const playtimeStrArr = playtimeStr.split(':')
-  return dayjs.duration({
-    days: parseInt(playtimeStrArr[0]),
-    hours: parseInt(playtimeStrArr[1]),
-    minutes: parseInt(playtimeStrArr[2]),
-    seconds: parseInt(playtimeStrArr[3]),
-  }).asSeconds()
-}
+export type BattleRoyaleStats = OverallStatsFields & ClassStatsFields
 
 const classStatsQuery = jsonata(`$[customName.text = $classNameText]{
   'wins': $number(customLore[text = 'Wins: '].extra.text),
@@ -93,29 +83,23 @@ const overallStatsQuery = jsonata(`$[customName.text = 'Overall Stats']{
 
 overallStatsQuery.assign('parsePlaytime', parsePlaytime)
 
-function scrapeClassStats(brStatsItems: any, className: string) {
+const parseClassStats = (brStatsItems: any, className: string) => {
   return classStatsQuery.evaluate(brStatsItems, { classNameText: `${className} Stats` }) as Promise<ClassStats>
 }
 
-async function scrapeBrStats(brStatsItems: any): Promise<BrStats> {
+export const parseBattleRoyaleStats = async (brStatsItems: any): Promise<BattleRoyaleStats> => {
   const overallStats = await overallStatsQuery.evaluate(brStatsItems) as OverallStatsFields
 
   const classStats: ClassStatsFields = {
-    miner: await scrapeClassStats(brStatsItems, 'Miner'),
-    warrior: await scrapeClassStats(brStatsItems, 'Warrior'),
-    trapper: await scrapeClassStats(brStatsItems, 'Trapper'),
-    archer: await scrapeClassStats(brStatsItems, 'Archer'),
-    looter: await scrapeClassStats(brStatsItems, 'Looter'),
+    miner: await parseClassStats(brStatsItems, 'Miner'),
+    warrior: await parseClassStats(brStatsItems, 'Warrior'),
+    trapper: await parseClassStats(brStatsItems, 'Trapper'),
+    archer: await parseClassStats(brStatsItems, 'Archer'),
+    looter: await parseClassStats(brStatsItems, 'Looter'),
   }
 
   return {
     ...overallStats,
     ...classStats,
-  }
-}
-
-export function useScrapeFunctions() {
-  return {
-    scrapeBrStats,
   }
 }

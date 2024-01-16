@@ -1,6 +1,16 @@
-import dayjs from 'dayjs'
+import { default as dayjsLib } from 'dayjs'
 import duration from 'dayjs/plugin/duration.js'
 
-dayjs.extend(duration)
+dayjsLib.extend(duration)
 
-export default dayjs
+export const dayjs = dayjsLib
+
+export const parsePlaytime = (playtimeStr: string) => {
+  const playtimeStrArr = playtimeStr.split(':')
+  return dayjs.duration({
+    days: parseInt(playtimeStrArr[0]),
+    hours: parseInt(playtimeStrArr[1]),
+    minutes: parseInt(playtimeStrArr[2]),
+    seconds: parseInt(playtimeStrArr[3]),
+  }).asSeconds()
+}
