@@ -24,6 +24,11 @@ const STATS_ITEMS_COUNT = {
   'duels': 13,
 }
 
+const ERROR_CHAT_PATTERNS = [
+  'An unexpected error occurred. Please try again later!',
+  `You cannot view this player's profile due to their privacy settings!`,
+]
+
 export const scrapeWindowStats = async (bot: Bot, username: string, category: 'battle-royale' | 'duels') => {
   console.log('Bot: /stats', username)
   bot.chat(`/stats ${username}`)
@@ -31,8 +36,10 @@ export const scrapeWindowStats = async (bot: Bot, username: string, category: 'b
   const statsErrMsg = new AbortController()
 
   const errMsgObserver = (jsonMsg: ChatMessage, position: string) => {
-    if (position === 'system' && jsonMsg.extra?.at(1)?.toString().endsWith('An unexpected error occurred. Please try again later!')) {
-      statsErrMsg.abort()
+    if (position === 'system') {
+      const isErrMsg = ERROR_CHAT_PATTERNS.some(pattern => jsonMsg.extra?.at(1)?.toString().endsWith(pattern))
+      if (isErrMsg)
+        statsErrMsg.abort()
     }
   }
 
