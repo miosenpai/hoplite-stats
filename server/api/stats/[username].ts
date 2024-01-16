@@ -23,7 +23,7 @@ export default defineEventHandler(async (event) => {
 
   const cacheStore = useStorage('cache')
 
-  const firstScrape = !(await cacheStore.hasItem(`nitro:functions:hoplite-${query.category}-stats:${uuidRes._data!.id}.json`))
+  const firstScrape = !(await cacheStore.hasItem(`nitro:functions:${query.category}-stats:${uuidRes._data!.id}.json`))
 
   if (firstScrape) {
     const scrapeQueue = useScrapeQueue()
