@@ -36,6 +36,7 @@ export default defineEventHandler(async (event) => {
           break
         case 'duels':
           getDuelsStats(uuidRes._data!.id, uuidRes._data!.name)
+          break
       }
     }
     setResponseStatus(event, 202)

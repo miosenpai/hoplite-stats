@@ -47,6 +47,8 @@ const createNewBot = async () => {
     newBot.removeListener('error', console.log)
   }
 
+  newBot.entities[''].type
+
   try {
     for await (const _ of on(newBot, 'spawn', { signal: initalConn.signal })) {
       connections += 1
