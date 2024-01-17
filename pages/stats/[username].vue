@@ -99,4 +99,17 @@ watch(selectedCategoryQuery, (newSelected) => {
 /* watchEffect(() => console.log(error)) */
 /* watchEffect(() => queryCategory.value) */
 
+if (!queryCategory) {
+  /* defineOgImageComponent(
+    'BattleRoyaleSeoCard',
+    {
+
+    },
+    {
+      renderer: 'satori',
+    },
+  ) */
+  defineOgImageScreenshot()
+}
+
 </script>

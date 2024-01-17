@@ -14,9 +14,11 @@ export default defineNuxtConfig({
     },
     redisHost: '',
   },
+  // @ts-ignore
   modules: [
     '@nuxt/ui',
     '@vueuse/nuxt',
+    'nuxt-og-image',
   ],
   css: [
     '@fontsource-variable/dm-sans',
@@ -55,4 +57,8 @@ export default defineNuxtConfig({
       pathPrefix: false,
     },
   ],
+  ogImage: {
+    // future: figure out the correct settings for this
+    runtimeCacheStorage: false,
+  },
 })
