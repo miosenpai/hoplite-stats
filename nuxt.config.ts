@@ -60,5 +60,11 @@ export default defineNuxtConfig({
   ogImage: {
     // future: figure out the correct settings for this
     runtimeCacheStorage: false,
+    compatibility: {
+      // do not install chromium for CI: https://nuxtseo.com/og-image/guides/chromium#prerenderer-ci-chromium
+      prerender: {
+        chromium: false,
+      },
+    },
   },
 })
