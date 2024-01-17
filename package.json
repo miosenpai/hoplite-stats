@@ -9,8 +9,7 @@
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
     "lint": "eslint .",
-    "start": "node .output/server/index.mjs",
-    "heroku-cleanup": "npx playwright install chromium"
+    "start": "node .output/server/index.mjs"
   },
   "engines": {
     "node": "18.x"
