@@ -37,7 +37,9 @@ const createNewBot = async () => {
 
   const initalConn = new AbortController()
 
-  newBot.once('end', initalConn.abort)
+  const onInitConnFail = () => initalConn.abort()
+
+  newBot.once('end', onInitConnFail)
 
   const cleanUpListeners = () => {
     newBot.removeListener('resourcePack', onResourcePack)
@@ -54,7 +56,7 @@ const createNewBot = async () => {
 
       if (connections === 2) {
         console.log('Bot Connected: Lobby')
-        newBot.removeListener('end', initalConn.abort)
+        newBot.removeListener('end', onInitConnFail)
         break
       }
     }
