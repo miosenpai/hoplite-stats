@@ -25,76 +25,78 @@
         {{ username }}
       </h1>
       <USelectMenu
-        v-model="selectedGameMode"
+        v-model="selectedCategory"
         class="not-prose w-1/6"
-        :options="gameModes"
+        :options="categories"
         size="lg"
+        :disabled="pending"
       />
     </div>
     <UDivider />
-    <div
-      :class="[
-        // 'flex py-6 gap-6 items-center'
-        'grid',
-        'profile-grid',
-        'gap-6',
-        'py-6'
-      ]"
-    >
-      <img
-        :src="`https://minotar.net/avatar/${username}`"
-        class="min-h-full aspect-square"
-      >
-      <OverallStatsPanel v-bind="statsData" />
-    </div>
-    <div
-      :class="[
-        'grid grid-cols-2',
-        'gap-6',
-        'pb-6'
-      ]"
-    >
-      <ClassStatsPanel
-        v-bind="statsData.miner"
-        class-name="Miner"
+    <template v-if="!pending">
+      <BattleRoyaleStats
+        v-if="!route.query.category"
+        v-bind="(statsData as BattleRoyaleStats)"
+        :username="username"
       />
-      <ClassStatsPanel
-        v-bind="statsData.warrior"
-        class-name="Warrior"
+      <DuelsStats
+        v-else-if="route.query.category === 'duels'"
+        v-bind="(statsData as DuelsStats)"
+        :username="username"
       />
-      <ClassStatsPanel
-        v-bind="statsData.trapper"
-        class-name="Trapper"
-      />
-      <ClassStatsPanel
-        v-bind="statsData.archer"
-        class-name="Archer"
-      />
-      <ClassStatsPanel
-        v-bind="statsData.looter"
-        class-name="Looter"
-      />
-    </div>
+    </template>
   </UContainer>
 </template>
 
 <script setup lang="ts">
 import type { BattleRoyaleStats } from '@/server/utils/scrape-functions/battle-royale'
+import type { DuelsStats } from '@/server/utils/scrape-functions/duels'
+// import { useRouteQuery } from '@vueuse/router'
 
 const route = useRoute()
+const router = useRouter()
 
-const username = route.params.username
+// const queryCategory = useRouteQuery<string | undefined>('category', undefined)
 
-const { data: statsData, error } = await useFetch<BattleRoyaleStats>(`/api/stats/${username}`)
+const queryCategory = route.query.category as string | undefined
 
-const gameModes = ['Battle Royale', 'Duels']
+const categories = [
+  {
+    category: '',
+    label: 'Battle Royale',
+  },
+  {
+    category: 'duels',
+    label: 'Duels',
+  },
+]
 
-const selectedGameMode = ref(gameModes[0])
+const selectedCategory = ref(
+  categories.find(c => c.category === queryCategory)
+    ? categories.find(c => c.category === queryCategory)!
+    : categories[0],
+)
+
+const username = route.params.username as string
+
+const selectedCategoryQuery = computed(() => selectedCategory.value.category || undefined)
+
+// future: looking into client side caching once https://github.com/nuxt/nuxt/issues/24332 is fixed
+const { data: statsData, error, pending } = await useFetch(`/api/stats/${username}`, {
+  query: {
+    category: selectedCategoryQuery,
+  },
+})
+
+watch(selectedCategoryQuery, (newSelected) => {
+  console.log(newSelected)
+  if (newSelected)
+    router.push({ name: route.name!, query: { category: newSelected } })
+  else
+    router.push({ name: route.name!, query: { category: undefined } })
+})
+
+/* watchEffect(() => console.log(error)) */
+/* watchEffect(() => queryCategory.value) */
 
 </script>
-
-<style scoped>
-.profile-grid {
-  grid-template-columns: max-content auto;
-}
-</style>

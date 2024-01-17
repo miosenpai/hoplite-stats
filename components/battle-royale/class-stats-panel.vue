@@ -48,9 +48,3 @@ import type { ClassStats } from '@/server/utils/scrape-functions/battle-royale'
 
 const props = defineProps<ClassStats & { className: string }>()
 </script>
-
-<style scoped>
-.overall-stats-grid {
-  grid-template-columns: min-content auto min-content;
-}
-</style>

@@ -37,8 +37,8 @@ const kitStatsQuery = jsonata(`$[customName.text = $kitNameText]{
   'deaths': $number(customLore[text = 'Deaths: '].extra.text),
   'winLossRatio': $number(customLore[text = 'W/L Ratio: '].extra.text),
   'killDeathRatio': $number(customLore[text = 'K/D Ratio: '].extra.text),
-  'currWinStreak': $number(customLore[text = 'Current Winstreak: '].extra.text),
-  'bestWinStreak': $number(customLore[text = 'Best Winstreak: '].extra.text)
+  'currWinstreak': $number(customLore[text = 'Current Winstreak: '].extra.text),
+  'bestWinstreak': $number(customLore[text = 'Best Winstreak: '].extra.text)
 }`)
 
 kitStatsQuery.assign('parsePlaytime', parsePlaytime)
