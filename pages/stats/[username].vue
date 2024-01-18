@@ -99,6 +99,6 @@ watch(selectedCategoryQuery, (newSelected) => {
 /* watchEffect(() => console.log(error)) */
 /* watchEffect(() => queryCategory.value) */
 
-defineOgImageScreenshot()
+// defineOgImageScreenshot()
 
 </script>
