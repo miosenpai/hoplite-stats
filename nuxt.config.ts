@@ -67,4 +67,11 @@ export default defineNuxtConfig({
       },
     },
   },
+  build: {
+    // these packages have CJS compat issues
+    transpile: [
+      'mineflayer-pathfinder',
+      'prismarine-block',
+    ],
+  },
 })

@@ -6,6 +6,8 @@ export type ScrapeJob = {
   uuid: string
 } | {
   category: 'leaderboard'
+  gamemode: string
+  timeframe: string
 }
 
 export const handleScrapeJob = async (job: ScrapeJob) => {
@@ -16,7 +18,7 @@ export const handleScrapeJob = async (job: ScrapeJob) => {
     case 'duels':
       return scrapeWindowStats(bot, job.username, job.category)
     case 'leaderboard':
-      throw Error('Not yet implemented.')
+      return scrapeLeaderboard(bot, job.gamemode, job.timeframe)
   }
 }
 

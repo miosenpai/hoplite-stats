@@ -1,5 +1,7 @@
 import mineflayer from 'mineflayer'
 import { on } from 'node:events'
+import { pathfinder } from 'mineflayer-pathfinder'
+import { mineflayer as viewer } from 'prismarine-viewer'
 
 let bot: mineflayer.Bot | null = null
 
@@ -12,8 +14,8 @@ const createNewBot = async () => {
 
   const newBot = mineflayer.createBot({
     username: runtimeCfg.bot.authName,
-    host: runtimeCfg.bot.serverHost,
     auth: 'microsoft',
+    host: runtimeCfg.bot.serverHost,
     // @ts-ignore
     profilesFolder: (authCacheOpts: Parameters<typeof createAuthCache>[0]) => {
       if (!authCaches.has(authCacheOpts.cacheName))
@@ -63,6 +65,12 @@ const createNewBot = async () => {
   } catch (err) {
     cleanUpListeners()
     throw err
+  }
+
+  newBot.loadPlugin(pathfinder)
+
+  if (import.meta.dev) {
+    viewer(newBot, { port: 3030 })
   }
 
   inactiveDc = setTimeout(newBot.quit, dayjs.duration(runtimeCfg.bot.idleMinutes, 'minutes').asMilliseconds())

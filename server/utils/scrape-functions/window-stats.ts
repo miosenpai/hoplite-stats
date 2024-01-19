@@ -1,18 +1,7 @@
 import type { Bot } from 'mineflayer'
 import type { Window } from 'prismarine-windows'
-import type { Item } from 'prismarine-item'
 import type { ChatMessage } from 'prismarine-chat'
 import { on, once } from 'node:events'
-
-type CustomName = {
-  italic: boolean
-  color: string
-  text: string
-}
-
-type ItemWindowEvents = {
-  updateSlot: (slot: number, oldItem: Item, newItem: Item) => Promise<void> | void
-}
 
 const STATS_BTN_MAP = {
   'battle-royale': 'Battle Royale Stats',
