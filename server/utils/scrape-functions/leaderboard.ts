@@ -6,8 +6,9 @@ import type { Item } from 'prismarine-item'
 import type { Entity } from 'prismarine-entity'
 import { once, on } from 'node:events'
 import timer from 'node:timers/promises'
+import pRetry from 'p-retry'
 
-// const LEADERBOARD_VIEW_POS = new goals.GoalXZ(-35.5, -2.5)
+const LEADERBOARD_VIEW_POS = new goals.GoalBlock(-34, 101, -3)
 
 const WINS_LEADERBOARD_POS = v(-36, 101, -8)
 const KILLS_LEADERBOARD_POS = v(-36, 101, -14)
@@ -22,32 +23,14 @@ export const scrapeLeaderboard = async (bot: Bot, gamemode: string, timespan: st
 
   console.log('Bot: Moving To Leaderboard Area')
 
-  // const pos = new goals.GoalGetToBlock(-58, 63, -45)
-
-  // const pos = new goals.GoalXZ(-35, -3)
-
-  // const pos = new goals.GoalGetToBlock(-35, 101, -8)
-
-  // await bot.pathfinder.goto(pos)
-
-  await bot.pathfinder.goto(new goals.GoalBlock(-34, 101, 0))
-
-  await bot.pathfinder.goto(new goals.GoalBlock(-34, 101, -9))
+  await pRetry(async () => {
+    await bot.pathfinder.goto(LEADERBOARD_VIEW_POS)
+  }, {
+    factor: 1,
+    retries: 3,
+  })
 
   console.log('Bot: Reached Leaderboard Area')
-
-  // await bot.look(degreesToRadians(-179), degreesToRadians(6))
-
-  // await bot.lookAt(v(-35.5, 102, -2.5))
-
-  // const e = bot.nearestEntity(e => e.displayName === 'Armor Stand')!
-
-  // await bot.lookAt(e.position)
-
-  // how we find the settings window "click hitbox", "Interaction" display name should be unique
-  /* const filtered = Object.values(bot.entities).filter((entity) => {
-    return entity.position.xzDistanceTo(bot.entity.position) <= 3 && entity.displayName === 'Interaction'
-  }) */
 
   const hologramBtn = bot.nearestEntity(e => e.displayName === 'Interaction')
 
