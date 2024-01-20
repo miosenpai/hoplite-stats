@@ -5,10 +5,9 @@ import type { Window } from 'prismarine-windows'
 import type { Item } from 'prismarine-item'
 import type { Entity } from 'prismarine-entity'
 import { once, on } from 'node:events'
-import type { ChatMessage } from 'prismarine-chat'
-import timers from 'node:timers/promises'
+import timer from 'node:timers/promises'
 
-const LEADERBOARD_VIEW_POS = new goals.GoalXZ(-35.5, -2.5)
+// const LEADERBOARD_VIEW_POS = new goals.GoalXZ(-35.5, -2.5)
 
 const WINS_LEADERBOARD_POS = v(-36, 101, -8)
 const KILLS_LEADERBOARD_POS = v(-36, 101, -14)
@@ -25,31 +24,40 @@ export const scrapeLeaderboard = async (bot: Bot, gamemode: string, timespan: st
 
   // const pos = new goals.GoalGetToBlock(-58, 63, -45)
 
-  const pos = new goals.GoalXZ(-35, -3)
+  // const pos = new goals.GoalXZ(-35, -3)
 
-  await bot.pathfinder.goto(pos)
+  // const pos = new goals.GoalGetToBlock(-35, 101, -8)
+
+  // await bot.pathfinder.goto(pos)
+
+  await bot.pathfinder.goto(new goals.GoalBlock(-34, 101, 0))
+
+  await bot.pathfinder.goto(new goals.GoalBlock(-34, 101, -9))
 
   console.log('Bot: Reached Leaderboard Area')
 
   // await bot.look(degreesToRadians(-179), degreesToRadians(6))
 
-  await bot.lookAt(v(-35.5, 102, -2.5))
+  // await bot.lookAt(v(-35.5, 102, -2.5))
 
   // const e = bot.nearestEntity(e => e.displayName === 'Armor Stand')!
 
   // await bot.lookAt(e.position)
 
   // how we find the settings window "click hitbox", "Interaction" display name should be unique
-  const filtered = Object.values(bot.entities).filter((entity) => {
+  /* const filtered = Object.values(bot.entities).filter((entity) => {
     return entity.position.xzDistanceTo(bot.entity.position) <= 3 && entity.displayName === 'Interaction'
-  })
+  }) */
 
-  if (filtered.length < 1)
+  const hologramBtn = bot.nearestEntity(e => e.displayName === 'Interaction')
+
+  if (!hologramBtn)
     throw Error('Unable to find settings hologram.')
 
   console.log('Bot: Opening Hologram Settings')
 
-  bot.attack(filtered[0])
+  await bot.lookAt(hologramBtn.position)
+  bot.attack(hologramBtn)
 
   const [settingsWindow] = await once(bot, 'windowOpen') as [Window<ItemWindowEvents>]
 
@@ -59,9 +67,8 @@ export const scrapeLeaderboard = async (bot: Bot, gamemode: string, timespan: st
     return item.customName?.includes('Mode')
   })
 
-  if (!modeBtn) {
+  if (!modeBtn)
     throw Error('Unable to find mode button.')
-  }
 
   let settingsChanged = false
 
@@ -73,13 +80,13 @@ export const scrapeLeaderboard = async (bot: Bot, gamemode: string, timespan: st
 
     for await (const eventArr of on(settingsWindow, 'updateSlot')) {
       const newItem = eventArr[2] as Item
-      if (!newItem)
-        continue
-      if (newItem.customName?.includes('Mode')) {
+      if (newItem && newItem.customName?.includes('Mode')) {
         modeBtn = newItem
         break
       }
     }
+    // this is necessary because the UI seems to be updated "optimistically"
+    await timer.setTimeout(1000)
   }
 
   let timespanBtn = settingsWindow.containerItems().find((item) => {
@@ -97,38 +104,30 @@ export const scrapeLeaderboard = async (bot: Bot, gamemode: string, timespan: st
 
     for await (const eventArr of on(settingsWindow, 'updateSlot')) {
       const newItem = eventArr[2] as Item
-      if (!newItem)
-        continue
-      if (newItem.customName?.includes('Select Time Span')) {
+      if (newItem && newItem.customName?.includes('Select Time Span')) {
         timespanBtn = newItem
         break
       }
     }
+    // this is necessary because the UI seems to be updated "optimistically"
+    await timer.setTimeout(1000)
   }
 
-  console.dir(settingsWindow.containerItems())
+  /* console.dir(modeBtn, { depth: null })
+  console.dir(timespanBtn, { depth: null }) */
+
+  const winsLeaderboardObjs: any[] = []
+  const killsLeaderboardObjs: any[] = []
 
   bot.closeWindow(settingsWindow)
 
-  // future: create a promise that resolves based on the successful chat message,
-  // technically, waiting a bit longer here helps with avoiding the hologram plugin cooldown
-  // await timers.setTimeout(500)
-
-  /* console.log('waiting for hologram updates')
-  for await (const eventArr of on(bot, 'message')) {
-    const [jsonMsg, position] = eventArr as [ChatMessage, string]
-    if (position === 'system') {
-      console.dir(jsonMsg, { depth: null })
-      break
-    }
-  } */
-
-  let pendingUpdates = settingsChanged ? 24 : 0
-
-  if (pendingUpdates > 0) {
+  if (settingsChanged) {
+    let pendingUpdates = 24
+    console.log('Waiting For Leaderboard Updates')
     for await (const eventArr of on(bot, 'entityUpdate')) {
-      if ((eventArr[0] as Entity).displayName === 'Armor Stand') {
-        console.log(eventArr[0])
+      const e = eventArr[0] as Entity
+      if (e.displayName === 'Armor Stand') {
+        console.log(e?.getCustomName())
         console.log('armor stand updated')
         pendingUpdates -= 1
       }
@@ -138,26 +137,20 @@ export const scrapeLeaderboard = async (bot: Bot, gamemode: string, timespan: st
     }
   }
 
-  // await timers.setTimeout(2000)
-
-  const winsLeaderboardObjs: any[] = []
-
   Object.values(bot.entities).filter(e => e.displayName === 'Armor Stand').forEach((e) => {
-    // console.log(e.getCustomName())
-    // console.dir(e.getCustomName(), { depth: null })
+    if (JSON.stringify(e.getCustomName()?.json)?.includes('-')) {
+      if (e.position.xzDistanceTo(WINS_LEADERBOARD_POS) <= 2)
+        winsLeaderboardObjs.push(e.getCustomName()?.json)
 
-    const dist = e.position.xzDistanceTo(WINS_LEADERBOARD_POS)
-    const customName = e.getCustomName()
-
-    if (dist <= 2 && customName) {
-      // console.dir(e.getCustomName(), { depth: null })
-      winsLeaderboardObjs.push(customName.json)
+      if (e.position.xzDistanceTo(KILLS_LEADERBOARD_POS) <= 2)
+        killsLeaderboardObjs.push(e.getCustomName()?.json)
     }
   })
 
-  const leaderboardRes = await parseLeaderboard(winsLeaderboardObjs)
-
-  console.log(leaderboardRes)
+  const leaderboardRes = {
+    wins: await parseLeaderboard(winsLeaderboardObjs),
+    kills: await parseLeaderboard(killsLeaderboardObjs),
+  }
 
   return leaderboardRes
 }
