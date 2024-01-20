@@ -1,6 +1,6 @@
 import jsonata from 'jsonata'
 
-const leaderboardQuery = jsonata(`$[[2..10]].{
+const leaderboardQuery = jsonata(`$[[2..11]].{
   'username': $trim(extra[-3].text),
   'value': $number(extra[-1].text)
 }`)

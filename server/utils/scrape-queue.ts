@@ -7,7 +7,7 @@ export type ScrapeJob = {
 } | {
   category: 'leaderboard'
   gamemode: string
-  timeframe: string
+  timespan: string
 }
 
 export const handleScrapeJob = async (job: ScrapeJob) => {
@@ -18,7 +18,7 @@ export const handleScrapeJob = async (job: ScrapeJob) => {
     case 'duels':
       return scrapeWindowStats(bot, job.username, job.category)
     case 'leaderboard':
-      return scrapeLeaderboard(bot, job.gamemode, job.timeframe)
+      return scrapeLeaderboard(bot, job.gamemode, job.timespan)
   }
 }
 
