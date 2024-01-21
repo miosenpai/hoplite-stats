@@ -54,7 +54,29 @@
         label: 'First time visit, please wait for data to be collected then refresh.' ,
       }"
       :columns="columns"
-    />
+      :ui="{
+        th: {
+          size: 'text-base'
+        },
+        td: {
+          size: 'text-base'
+        }
+      }"
+    >
+      <template #username-data="{ row }">
+        <NuxtLink
+          class="flex items-center gap-x-1.5"
+          :to="`/stats/${row.username}`"
+          :prefetch="false"
+        >
+          <img
+            :src="`https://minotar.net/helm/${row.username}`"
+            class="h-4"
+          >
+          <span>{{ row.username }}</span>
+        </NuxtLink>
+      </template>
+    </UTable>
   </UContainer>
 </template>
 
@@ -138,18 +160,24 @@ const { data: leaderboardData, pending } = await useFetch('/api/leaderboard', {
 })
 
 watch(selectedCategory, () => {
-  if (selectedCategory.value !== 'wins')
-    router.push({ name: route.name!, query: { category: selectedCategory.value } })
+  router.push({ name: route.name!, query: {
+    ...route.query,
+    category: selectedCategory.value !== 'wins' ? selectedCategory.value : undefined,
+  } })
 })
 
 watch(selectedMode, () => {
-  if (selectedMode.value !== 'solo')
-    router.push({ name: route.name!, query: { mode: selectedMode.value } })
+  router.push({ name: route.name!, query: {
+    ...route.query,
+    mode: selectedMode.value !== 'solo' ? selectedMode.value : undefined,
+  } })
 })
 
 watch(selectedTimespan, () => {
-  if (selectedTimespan.value !== 'solo')
-    router.push({ name: route.name!, query: { mode: selectedTimespan.value } })
+  router.push({ name: route.name!, query: {
+    ...route.query,
+    timespan: selectedTimespan.value !== 'lifetime' ? selectedTimespan.value : undefined,
+  } })
 })
 
 </script>

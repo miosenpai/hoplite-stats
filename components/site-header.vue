@@ -14,8 +14,8 @@
       >
         <h2>
           <UIcon
-            name="i-heroicons-chart-bar-solid"
-            class="align-[-0.125em]"
+            name="i-mdi-chart-line"
+            class="align-[-0.175em]"
           />
           Hoplite Stats
         </h2>
@@ -24,7 +24,7 @@
         v-if="route.path !== '/'"
         class="col-span-2"
       />
-      <UButton
+      <!--<UButton
         icon="i-mdi-github"
         color="white"
         size="xl"
@@ -33,7 +33,19 @@
           'col-start-4'
         ]"
         variant="ghost"
-      />
+      />-->
+      <UButton
+        icon="i-mdi-list-box"
+        :class="[
+          'justify-self-end',
+          'col-start-4'
+        ]"
+        color="gray"
+        size="lg"
+        variant="ghost"
+      >
+        Leaderboard
+      </UButton>
     </UContainer>
     <UDivider />
   </header>
