@@ -25,6 +25,7 @@
           :options="categories"
           size="lg"
           :disabled="false"
+          value-attribute="category"
         />
         <USelectMenu
           v-model="selectedMode"
@@ -32,6 +33,7 @@
           :options="modes"
           size="lg"
           :disabled="false"
+          value-attribute="mode"
         />
         <USelectMenu
           v-model="selectedTimespan"
@@ -39,33 +41,69 @@
           :options="timespans"
           size="lg"
           :disabled="false"
+          value-attribute="timespan"
         />
       </div>
     </div>
     <!-- <UDivider /> -->
     <UTable
-      :rows="leadeboardData"
+      :rows="leaderboardData ? leaderboardData[selectedCategory as 'kills' | 'wins'] : []"
+      :loading="pending"
+      :empty-state="{
+        icon: 'i-heroicons-circle-stack-20-solid',
+        label: 'First time visit, please wait for data to be collected then refresh.' ,
+      }"
+      :columns="columns"
     />
   </UContainer>
 </template>
 
 <script setup lang="ts">
-
 const route = useRoute()
+const router = useRouter()
+
+const categoryQuery = route.query.category as string | undefined
+const modeQuery = route.query.mode as string | undefined
+const timespanQuery = route.query.timespan as string | undefined
 
 const categories = [
-  'Wins',
-  'Kills',
+  {
+    category: 'wins',
+    label: 'Wins',
+  },
+  {
+    category: 'kills',
+    label: 'Kills',
+  },
 ]
 
-const selectedCategory = ref(categories[0])
+const selectedCategory = ref(categories.map(c => c.category).includes(categoryQuery!) ? categoryQuery! : 'wins')
+
+const columns = computed(() => {
+  return [
+    {
+      key: 'username',
+      label: 'Player',
+    },
+    {
+      key: 'value',
+      label: selectedCategory.value === 'wins' ? 'Wins' : 'Kills',
+    },
+  ]
+})
 
 const modes = [
-  'Solo',
-  'Civilization',
+  {
+    mode: 'solo',
+    label: 'Solo',
+  },
+  {
+    mode: 'civ',
+    label: 'Civilization',
+  },
 ]
 
-const selectedMode = ref(modes[0])
+const selectedMode = ref(modes.map(m => m.mode).includes(modeQuery!) ? modeQuery! : 'solo')
 
 const timespans = [
   {
@@ -77,30 +115,41 @@ const timespans = [
     label: 'This Season',
   },
   {
-    timespan: 'month',
+    timespan: 'monthly',
     label: 'Monthly',
   },
   {
-    timespan: 'week',
+    timespan: 'weekly',
     label: 'Weekly',
   },
   {
-    timespan: 'day',
+    timespan: 'daily',
     label: 'Daily',
   },
 ]
 
-const selectedTimespan = ref(timespans[0])
+const selectedTimespan = ref(timespans.map(t => t.timespan).includes(timespanQuery!) ? timespanQuery! : 'lifetime')
 
-const leadeboardData = [
-  {
-    username: 'xShatter',
-    kills: 50,
+const { data: leaderboardData, pending } = await useFetch('/api/leaderboard', {
+  query: {
+    gamemode: selectedMode,
+    timespan: selectedTimespan,
   },
-  {
-    username: 'Yuishikawa',
-    kills: 25,
-  },
-]
+})
+
+watch(selectedCategory, () => {
+  if (selectedCategory.value !== 'wins')
+    router.push({ name: route.name!, query: { category: selectedCategory.value } })
+})
+
+watch(selectedMode, () => {
+  if (selectedMode.value !== 'solo')
+    router.push({ name: route.name!, query: { mode: selectedMode.value } })
+})
+
+watch(selectedTimespan, () => {
+  if (selectedTimespan.value !== 'solo')
+    router.push({ name: route.name!, query: { mode: selectedTimespan.value } })
+})
 
 </script>

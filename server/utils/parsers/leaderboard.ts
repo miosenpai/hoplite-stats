@@ -5,7 +5,7 @@ const leaderboardQuery = jsonata(`$[[1..10]].{
   'value': $number(extra[-1].text)
 }`)
 
-type LeaderboardEntry = {
+export type LeaderboardEntry = {
   username: string
   value: number
 }

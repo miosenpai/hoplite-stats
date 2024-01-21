@@ -11,6 +11,7 @@ export type ScrapeJob = {
   timespan: string
 }
 
+// todo: use mapped/generic type to accurately determine the return type here
 export const handleScrapeJob = async (job: ScrapeJob) => {
   const bot = await useBot()
   console.log(`Starting '${job.category}' Scrape:`, job)

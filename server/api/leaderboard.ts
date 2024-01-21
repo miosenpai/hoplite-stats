@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import type { LeaderboardEntry } from '@/server/utils/parsers/leaderboard'
 
 const querySchema = z.object({
   gamemode: z.union([
@@ -19,6 +20,11 @@ const QUERY_COMBOS = ['solo', 'civ'].reduce((prev, curr: string) => {
   prev.push(...combos)
   return prev
 }, [] as { gamemode: string, timespan: string }[])
+
+type LeaderboardRes = {
+  wins: LeaderboardEntry[]
+  kills: LeaderboardEntry[]
+}
 
 export default defineEventHandler(async (event) => {
   const query = await getValidatedQuery(event, query => querySchema.parse(query))
@@ -47,7 +53,7 @@ export default defineEventHandler(async (event) => {
       message: Object.values(ScrapeError).includes(leaderboardRes.err) ? leaderboardRes.err : UNKNOWN_ERROR,
     })
   } else {
-    return leaderboardRes
+    return leaderboardRes as LeaderboardRes
   }
 })
 

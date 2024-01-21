@@ -18,7 +18,7 @@
     "@fontsource-variable/dm-sans": "^5.0.3",
     "@iconify/json": "^2.2.166",
     "@nuxt/eslint-config": "^0.2.0",
-    "@nuxt/ui": "^2.11.1",
+    "@nuxt/ui": "^2.12.3",
     "@playwright/test": "^1.41.0",
     "@stylistic/eslint-plugin": "^1.5.1",
     "@vueuse/core": "^10.7.2",
