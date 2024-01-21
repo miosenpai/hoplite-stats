@@ -1,7 +1,6 @@
 import mineflayer from 'mineflayer'
 import { on } from 'node:events'
 import { pathfinder } from 'mineflayer-pathfinder'
-import { mineflayer as viewer } from 'prismarine-viewer'
 
 let bot: mineflayer.Bot | null = null
 
@@ -70,7 +69,7 @@ const createNewBot = async () => {
   newBot.loadPlugin(pathfinder)
 
   if (import.meta.dev) {
-    viewer(newBot, { port: 3030 })
+    (await import('prismarine-viewer')).mineflayer(newBot, { port: 3030 })
   }
 
   inactiveDc = setTimeout(newBot.quit, dayjs.duration(runtimeCfg.bot.idleMinutes, 'minutes').asMilliseconds())
