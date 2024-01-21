@@ -43,6 +43,7 @@
         color="gray"
         size="lg"
         variant="ghost"
+        to="/leaderboard"
       >
         Leaderboard
       </UButton>
