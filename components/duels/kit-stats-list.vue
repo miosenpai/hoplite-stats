@@ -62,7 +62,7 @@
 </template>
 
 <script setup lang="ts">
-import type { KitStats } from '~/server/utils/scrape-functions/duels'
+import type { KitStats } from '~/server/utils/parsers/duels'
 
 type Fields = (keyof KitStats)[]
 

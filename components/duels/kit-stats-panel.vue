@@ -15,7 +15,7 @@
 </template>
 
 <script setup lang="ts">
-import type { KitStats } from '~/server/utils/scrape-functions/duels'
+import type { KitStats } from '~/server/utils/parsers/duels'
 
 const props = defineProps<KitStats & { className: string }>()
 </script>

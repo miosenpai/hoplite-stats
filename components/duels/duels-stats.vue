@@ -61,7 +61,7 @@
 </template>
 
 <script setup lang="ts">
-import type { DuelsStats } from '~/server/utils/scrape-functions/duels'
+import type { DuelsStats } from '~/server/utils/parsers/duels'
 
 const props = defineProps<DuelsStats & { username: string }>()
 

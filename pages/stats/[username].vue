@@ -49,8 +49,8 @@
 </template>
 
 <script setup lang="ts">
-import type { BattleRoyaleStats } from '@/server/utils/scrape-functions/battle-royale'
-import type { DuelsStats } from '@/server/utils/scrape-functions/duels'
+import type { BattleRoyaleStats } from '@/server/utils/parsers/battle-royale'
+import type { DuelsStats } from '@/server/utils/parsers/duels'
 // import { useRouteQuery } from '@vueuse/router'
 
 const route = useRoute()
