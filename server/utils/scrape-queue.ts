@@ -1,4 +1,5 @@
 import fastq from 'fastq'
+import timer from 'node:timers/promises'
 
 export type ScrapeJob = {
   category: 'battle-royale' | 'duels'
@@ -12,13 +13,17 @@ export type ScrapeJob = {
 
 export const handleScrapeJob = async (job: ScrapeJob) => {
   const bot = await useBot()
-  console.log(`Adding '${job.category}' Scrape:`, job)
+  console.log(`Starting '${job.category}' Scrape:`, job)
   switch (job.category) {
     case 'battle-royale':
     case 'duels':
       return scrapeWindowStats(bot, job.username, job.category)
-    case 'leaderboard':
-      return scrapeLeaderboard(bot, job.gamemode, job.timespan)
+    case 'leaderboard': {
+      const res = await scrapeLeaderboard(bot, job.gamemode, job.timespan)
+      // this timeout is important to not trigger hologram action cooldown
+      await timer.setTimeout(4000)
+      return res
+    }
   }
 }
 

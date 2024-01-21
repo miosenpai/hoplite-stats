@@ -3,19 +3,16 @@ import v from 'vec3'
 import { goals, Movements } from 'mineflayer-pathfinder'
 import type { Window } from 'prismarine-windows'
 import type { Item } from 'prismarine-item'
-import type { Entity } from 'prismarine-entity'
 import { once, on } from 'node:events'
 import timer from 'node:timers/promises'
 import pRetry from 'p-retry'
 
-const LEADERBOARD_VIEW_POS = new goals.GoalBlock(-34, 101, -3)
+const LEADERBOARD_VIEW_POS = new goals.GoalBlock(-35, 101, -2.5)
 
 const WINS_LEADERBOARD_POS = v(-36, 101, -8)
 const KILLS_LEADERBOARD_POS = v(-36, 101, -14)
 
 export const scrapeLeaderboard = async (bot: Bot, gamemode: string, timespan: string) => {
-  console.log(`scraping leaderboard:`, { gamemode, timespan })
-
   const movement = new Movements(bot)
   movement.canDig = false
 
@@ -28,6 +25,7 @@ export const scrapeLeaderboard = async (bot: Bot, gamemode: string, timespan: st
   }, {
     factor: 1,
     retries: 3,
+
   })
 
   console.log('Bot: Reached Leaderboard Area')
@@ -40,6 +38,7 @@ export const scrapeLeaderboard = async (bot: Bot, gamemode: string, timespan: st
   console.log('Bot: Opening Hologram Settings')
 
   await bot.lookAt(hologramBtn.position)
+
   bot.attack(hologramBtn)
 
   const [settingsWindow] = await once(bot, 'windowOpen') as [Window<ItemWindowEvents>]
@@ -105,20 +104,13 @@ export const scrapeLeaderboard = async (bot: Bot, gamemode: string, timespan: st
   bot.closeWindow(settingsWindow)
 
   if (settingsChanged) {
-    let pendingUpdates = 24
-    console.log('Waiting For Leaderboard Updates')
-    for await (const eventArr of on(bot, 'entityUpdate')) {
-      const e = eventArr[0] as Entity
-      if (e.displayName === 'Armor Stand') {
-        console.log(e?.getCustomName())
-        console.log('armor stand updated')
-        pendingUpdates -= 1
-      }
-
-      if (pendingUpdates === 0)
-        break
-    }
+    // the reason we don't use 'entityUpdate' here is: it's difficult to determine exactly
+    // how many holograms will update as sometimes a player will have the same position in 2
+    // different settings (in which case there will be no update packet)
+    await timer.setTimeout(4000)
   }
+
+  console.log('Parsing Leaderboard JSON')
 
   Object.values(bot.entities).filter(e => e.displayName === 'Armor Stand').forEach((e) => {
     if (JSON.stringify(e.getCustomName()?.json)?.includes('-')) {

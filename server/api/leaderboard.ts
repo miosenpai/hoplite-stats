@@ -14,11 +14,11 @@ const querySchema = z.object({
   ]).default('lifetime'),
 })
 
-const QUERY_COMBOS = ['solo', 'civ'].reduce((prev: object[], curr: string) => {
-  return ['lifetime', 'season', 'monthly', 'weekly', 'daily'].map((timespan) => {
-    return { gamemode: curr, timespan }
-  })
-}, [])
+const QUERY_COMBOS = ['solo', 'civ'].reduce((prev, curr: string) => {
+  const combos = ['lifetime', 'season', 'monthly', 'weekly', 'daily'].map(timespan => ({ gamemode: curr, timespan }))
+  prev.push(...combos)
+  return prev
+}, [] as { gamemode: string, timespan: string }[])
 
 export default defineEventHandler(async (event) => {
   const query = await getValidatedQuery(event, query => querySchema.parse(query))
@@ -29,9 +29,11 @@ export default defineEventHandler(async (event) => {
 
   // first scrape
   if (currKeys.length !== QUERY_COMBOS.length) {
-    // QUERY_COMBOS.forEach(q => getLeaderboard(q.gamemode, q.timespan))
-    // getLeaderboard('civ', 'lifetime')
-    getLeaderboard('solo', 'weekly')
+    const scrapeQueue = useScrapeQueue()
+
+    const scrapeInProgress = scrapeQueue.getQueue().some(j => j.category === 'leaderboard')
+    if (!scrapeInProgress)
+      QUERY_COMBOS.forEach(q => getLeaderboard(q.gamemode, q.timespan))
 
     setResponseStatus(event, 202)
     return
