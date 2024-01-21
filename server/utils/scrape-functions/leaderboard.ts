@@ -6,6 +6,7 @@ import type { Item } from 'prismarine-item'
 import { once, on } from 'node:events'
 import timer from 'node:timers/promises'
 import pRetry from 'p-retry'
+import pTimeout from 'p-timeout'
 
 const LEADERBOARD_VIEW_POS = new goals.GoalBlock(-35, 101, -2.5)
 
@@ -25,7 +26,6 @@ export const scrapeLeaderboard = async (bot: Bot, gamemode: string, timespan: st
   }, {
     factor: 1,
     retries: 3,
-
   })
 
   console.log('Bot: Reached Leaderboard Area')
@@ -37,11 +37,18 @@ export const scrapeLeaderboard = async (bot: Bot, gamemode: string, timespan: st
 
   console.log('Bot: Opening Hologram Settings')
 
-  await bot.lookAt(hologramBtn.position)
+  const settingsWindow = await pRetry(async () => {
+    await bot.lookAt(hologramBtn.position, true)
 
-  bot.attack(hologramBtn)
+    bot.attack(hologramBtn)
 
-  const [settingsWindow] = await once(bot, 'windowOpen') as [Window<ItemWindowEvents>]
+    const win = (await pTimeout(once(bot, 'windowOpen'), { milliseconds: 2000 }))[0] as Window<ItemWindowEvents>
+    return win
+  }, {
+    factor: 1,
+    retries: 3,
+    minTimeout: 2500,
+  })
 
   console.log('Bot: Opened Hologram Settings')
 
