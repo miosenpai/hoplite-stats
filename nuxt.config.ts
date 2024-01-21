@@ -18,14 +18,14 @@ export default defineNuxtConfig({
   modules: [
     '@nuxt/ui',
     '@vueuse/nuxt',
-    'nuxt-og-image',
+    // 'nuxt-og-image',
   ],
   css: [
     '@fontsource-variable/dm-sans',
   ],
   ui: {
-    // 'all' doesn't work on latest stable, it works on edge
-    icons: ['mdi'],
+    // causes build OOM error, switched to dynamic for now
+    // icons: ['mdi'],
   },
   tailwindcss: {
     viewer: false,
@@ -57,7 +57,7 @@ export default defineNuxtConfig({
       pathPrefix: false,
     },
   ],
-  ogImage: {
+  /* ogImage: {
     // future: figure out the correct settings for this
     runtimeCacheStorage: false,
     compatibility: {
@@ -66,7 +66,7 @@ export default defineNuxtConfig({
         chromium: false,
       },
     },
-  },
+  }, */
   build: {
     // these packages have CJS compat issues
     transpile: [

@@ -16,7 +16,6 @@
   },
   "devDependencies": {
     "@fontsource-variable/dm-sans": "^5.0.3",
-    "@iconify/json": "^2.2.166",
     "@nuxt/eslint-config": "^0.2.0",
     "@nuxt/ui": "^2.12.3",
     "@playwright/test": "^1.41.0",
@@ -29,7 +28,7 @@
     "jsonata": "^2.0.3",
     "mineflayer": "^4.18.0",
     "mineflayer-pathfinder": "^2.4.5",
-    "nuxt": "^3.9.0",
+    "nuxt": "3.9.0",
     "nuxt-og-image": "^3.0.0-rc.27",
     "p-retry": "^6.2.0",
     "prismarine-viewer": "^1.28.0",
