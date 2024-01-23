@@ -35,7 +35,7 @@ export default defineEventHandler(async (event) => {
 
   // first scrape
   if (currKeys.length !== QUERY_COMBOS.length) {
-    const scrapeQueue = useScrapeQueue()
+    const { scrapeQueue } = useScrapeQueue()
 
     const scrapeInProgress = scrapeQueue.getQueue().some(j => j.category === 'leaderboard')
     if (!scrapeInProgress)
@@ -58,10 +58,10 @@ export default defineEventHandler(async (event) => {
 })
 
 export const getLeaderboard = defineCachedFunction(async (gamemode: string, timespan: string) => {
-  const scrapeQueue = useScrapeQueue()
+  const { addScrapeJob } = useScrapeQueue()
 
   try {
-    const scrapeRes = await scrapeQueue.push({ category: 'leaderboard', gamemode, timespan })
+    const scrapeRes = await addScrapeJob({ category: 'leaderboard', gamemode, timespan })
 
     return scrapeRes
   } catch (err: any) {

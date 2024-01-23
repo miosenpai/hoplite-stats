@@ -26,9 +26,9 @@ export default defineEventHandler(async (event) => {
   const firstScrape = !(await cacheStore.hasItem(`nitro:functions:${query.category}-stats:${uuidRes._data!.id}.json`))
 
   if (firstScrape) {
-    const scrapeQueue = useScrapeQueue()
+    const { scrapeQueue } = useScrapeQueue()
     // we use uuid as job key, to not add duplicate scapes
-    const scrapeInProgress = scrapeQueue.getQueue().find(j => j.category === query.category && j.uuid === uuidRes._data!.id)
+    const scrapeInProgress = scrapeQueue.getQueue().find(j => j.category === query.category && j.username === uuidRes._data!.name)
     if (!scrapeInProgress) {
       switch (query.category) {
         case 'battle-royale':
@@ -65,10 +65,10 @@ export default defineEventHandler(async (event) => {
 })
 
 const getBattleRoyaleStats = defineCachedFunction(async (uuid: string, username: string) => {
-  const scrapeQueue = useScrapeQueue()
+  const { addScrapeJob } = useScrapeQueue()
 
   try {
-    const scrapeRes = await scrapeQueue.push({ username, uuid, category: 'battle-royale' })
+    const scrapeRes = await addScrapeJob({ username, category: 'battle-royale' })
 
     return scrapeRes
   } catch (err: any) { // must catch here, if defineCachedFunction errors it will infinitely return a cached res
@@ -85,10 +85,10 @@ const getBattleRoyaleStats = defineCachedFunction(async (uuid: string, username:
 })
 
 const getDuelsStats = defineCachedFunction(async (uuid: string, username: string) => {
-  const scrapeQueue = useScrapeQueue()
+  const { addScrapeJob } = useScrapeQueue()
 
   try {
-    const scrapeRes = await scrapeQueue.push({ username, uuid, category: 'duels' })
+    const scrapeRes = await addScrapeJob({ username, category: 'duels' })
 
     return scrapeRes
   } catch (err: any) { // must catch here, if defineCachedFunction errors it will infinitely return a cached res

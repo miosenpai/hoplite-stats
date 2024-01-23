@@ -8,6 +8,11 @@ import timer from 'node:timers/promises'
 import pRetry from 'p-retry'
 import pTimeout from 'p-timeout'
 
+export type LeaderboardStats = {
+  wins: LeaderboardEntry[]
+  kills: LeaderboardEntry[]
+}
+
 const LEADERBOARD_VIEW_POS = new goals.GoalBlock(-35, 101, -2.5)
 
 const WINS_LEADERBOARD_POS = v(-36, 101, -8)
@@ -129,7 +134,7 @@ export const scrapeLeaderboard = async (bot: Bot, gamemode: string, timespan: st
     }
   })
 
-  const leaderboardRes = {
+  const leaderboardRes: LeaderboardStats = {
     wins: await parseLeaderboard(winsLeaderboardObjs),
     kills: await parseLeaderboard(killsLeaderboardObjs),
   }
