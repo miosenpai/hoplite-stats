@@ -159,24 +159,24 @@ const { data: leaderboardData, pending } = await useFetch('/api/leaderboard', {
   },
 })
 
-watch(selectedCategory, () => {
+watch(selectedCategory, (newCategory) => {
   router.push({ name: route.name!, query: {
     ...route.query,
-    category: selectedCategory.value !== 'wins' ? selectedCategory.value : undefined,
+    category: newCategory !== 'wins' ? newCategory : undefined,
   } })
 })
 
-watch(selectedMode, () => {
+watch(selectedMode, (newMode) => {
   router.push({ name: route.name!, query: {
     ...route.query,
-    mode: selectedMode.value !== 'solo' ? selectedMode.value : undefined,
+    mode: newMode !== 'solo' ? newMode : undefined,
   } })
 })
 
-watch(selectedTimespan, () => {
+watch(selectedTimespan, (newTimespan) => {
   router.push({ name: route.name!, query: {
     ...route.query,
-    timespan: selectedTimespan.value !== 'lifetime' ? selectedTimespan.value : undefined,
+    timespan: newTimespan !== 'lifetime' ? newTimespan : undefined,
   } })
 })
 
