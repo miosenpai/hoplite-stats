@@ -1,6 +1,6 @@
 <template>
   <UContainer
-    v-if="error || !statsData"
+    v-if="error || statsLoading"
     :class="[prose, 'flex flex-col justify-center min-h-full']"
   >
     <h1
@@ -9,12 +9,12 @@
     >
       Error: {{ error.statusCode === 404 ? 'Failed to find player.' : 'Unexpected error occurred.' }}
     </h1>
-    <h1
-      v-else
-      class="text-center"
-    >
-      First time visit, please wait for stats to be collected then refresh.
-    </h1>
+    <template v-else>
+      <h1 class="text-center">
+        First time visit, please wait for stats to be collected then refresh.
+      </h1>
+      <UProgress />
+    </template>
   </UContainer>
   <UContainer v-else>
     <div
@@ -30,6 +30,7 @@
         :options="categories"
         size="lg"
         :disabled="pending"
+        value-attribute="category"
       />
     </div>
     <UDivider />
@@ -56,13 +57,11 @@ import type { DuelsStats } from '@/server/utils/parsers/duels'
 const route = useRoute()
 const router = useRouter()
 
-// const queryCategory = useRouteQuery<string | undefined>('category', undefined)
-
-const queryCategory = route.query.category as string | undefined
+const categoryQuery = route.query.category as string | undefined
 
 const categories = [
   {
-    category: '',
+    category: 'battle-royale',
     label: 'Battle Royale',
   },
   {
@@ -71,33 +70,45 @@ const categories = [
   },
 ]
 
-const selectedCategory = ref(
-  categories.find(c => c.category === queryCategory)
-    ? categories.find(c => c.category === queryCategory)!
-    : categories[0],
-)
+const selectedCategory = ref(categories.map(c => c.category).includes(categoryQuery!) ? categoryQuery! : 'battle-royale')
 
 const username = route.params.username as string
 
-const selectedCategoryQuery = computed(() => selectedCategory.value.category || undefined)
+const initalScrapeLoading = ref(false)
 
 // future: looking into client side caching once https://github.com/nuxt/nuxt/issues/24332 is fixed
-const { data: statsData, error, pending } = await useFetch(`/api/stats/${username}`, {
+const { data: statsData, error, pending, refresh } = await useFetch(`/api/stats/${username}`, {
   query: {
-    category: selectedCategoryQuery,
+    category: selectedCategory,
+  },
+  onResponse: ({ response }) => {
+    if (response.status === 202)
+      initalScrapeLoading.value = true
   },
 })
 
-watch(selectedCategoryQuery, (newSelected) => {
-  console.log(newSelected)
-  if (newSelected)
-    router.push({ name: route.name!, query: { category: newSelected } })
-  else
-    router.push({ name: route.name!, query: { category: undefined } })
+const statsLoading = computed(() => initalScrapeLoading.value || pending.value)
+
+onMounted(() => {
+  if (statsData.value && 'sseToken' in statsData.value) {
+    const es = new EventSource(`/api/stats/${username}/sse?sseToken=${statsData.value.sseToken}`)
+
+    const onComplete = async () => {
+      es.close()
+      await refresh()
+      initalScrapeLoading.value = false
+      es.removeEventListener('complete', onComplete)
+    }
+
+    es.addEventListener('complete', onComplete)
+  }
 })
 
-/* watchEffect(() => console.log(error)) */
-/* watchEffect(() => queryCategory.value) */
+watch(selectedCategory, (newCategory) => {
+  router.push({ name: route.name!, query: { category: newCategory !== 'battle-royale' ? newCategory : undefined } })
+})
+
+watchEffect(() => console.log(statsLoading.value))
 
 // defineOgImageScreenshot()
 

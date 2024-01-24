@@ -13,6 +13,7 @@ export default defineNuxtConfig({
       authName: '',
     },
     redisHost: '',
+    sseSecret: '',
   },
   // @ts-ignore
   modules: [

@@ -1,6 +1,7 @@
 import { z } from 'zod'
+import * as jose from 'jose'
 
-const querySchema = z.object({
+export const querySchema = z.object({
   category: z.union([
     z.literal('battle-royale'),
     z.literal('duels'),
@@ -23,12 +24,23 @@ export default defineEventHandler(async (event) => {
 
   const cacheStore = useStorage('cache')
 
-  const firstScrape = !(await cacheStore.hasItem(`nitro:functions:${query.category}-stats:${uuidRes._data!.id}.json`))
+  const currKeys = await cacheStore.getKeys(`nitro:functions:stats:${uuidRes._data!.id}`)
 
-  if (firstScrape) {
-    const { scrapeQueue } = useScrapeQueue()
+  // console.log(currKeys)
+
+  // first scrape
+  if (currKeys.length !== 2) {
+    // const { scrapeQueue } = useScrapeQueue()
+
+    // don't need to worry about duplicate initial scrapes (cachedFunction doesn't rerun when one's pending)
+    if (!currKeys.some(k => k.includes('battle-royale')))
+      getBattleRoyaleStats(uuidRes._data!.id, uuidRes._data!.name)
+
+    if (!currKeys.some(k => k.includes('duels')))
+      getDuelsStats(uuidRes._data!.id, uuidRes._data!.name)
+
     // we use uuid as job key, to not add duplicate scapes
-    const scrapeInProgress = scrapeQueue.getQueue().find(j => j.category === query.category && j.username === uuidRes._data!.name)
+    /* const scrapeInProgress = scrapeQueue.getQueue().find(j => j.category === query.category && j.username === uuidRes._data!.name)
     if (!scrapeInProgress) {
       switch (query.category) {
         case 'battle-royale':
@@ -38,9 +50,16 @@ export default defineEventHandler(async (event) => {
           getDuelsStats(uuidRes._data!.id, uuidRes._data!.name)
           break
       }
-    }
+    } */
     setResponseStatus(event, 202)
-    return
+
+    const runtimeCfg = useRuntimeConfig()
+
+    const sseToken = await new jose.SignJWT({ uuid: uuidRes._data!.id, username: uuidRes._data!.name })
+      .setProtectedHeader({ alg: 'HS256' })
+      .sign(Buffer.from(runtimeCfg.sseSecret))
+
+    return { sseToken }
   }
 
   let statsRes = null
@@ -64,7 +83,7 @@ export default defineEventHandler(async (event) => {
   }
 })
 
-const getBattleRoyaleStats = defineCachedFunction(async (uuid: string, username: string) => {
+export const getBattleRoyaleStats = defineCachedFunction(async (uuid: string, username: string) => {
   const { addScrapeJob } = useScrapeQueue()
 
   try {
@@ -78,13 +97,13 @@ const getBattleRoyaleStats = defineCachedFunction(async (uuid: string, username:
 }, {
   // todo: figure out a good cache duration for stats
   maxAge: dayjs.duration(2, 'hours').asSeconds(),
-  name: 'battle-royale-stats',
+  name: 'stats',
   getKey(uuid) {
-    return uuid
+    return `${uuid}:battle-royale`
   },
 })
 
-const getDuelsStats = defineCachedFunction(async (uuid: string, username: string) => {
+export const getDuelsStats = defineCachedFunction(async (uuid: string, username: string) => {
   const { addScrapeJob } = useScrapeQueue()
 
   try {
@@ -97,8 +116,8 @@ const getDuelsStats = defineCachedFunction(async (uuid: string, username: string
   }
 }, {
   maxAge: dayjs.duration(1, 'hours').asSeconds(),
-  name: 'duels-stats',
+  name: 'stats',
   getKey(uuid) {
-    return uuid
+    return `${uuid}:duels`
   },
 })
