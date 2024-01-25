@@ -3,11 +3,14 @@
     :class="[prose, 'max-w-none']"
     :ui="{
       body: {
-        base: 'grid grid-cols-2 gap-x-12 gap-y-0.5'
+        base: [
+          'grid grid-cols-1 gap-x-12 gap-y-0.5',
+          'lg:grid-cols-2',
+        ]
       }
     }"
   >
-    <h3 class="mt-0 col-span-2">
+    <h3 class="mt-0 lg:col-span-2">
       {{ props.className }} Stats
     </h3>
     <StatRow

@@ -66,7 +66,7 @@ import type { KitStats } from '~/server/utils/parsers/duels'
 
 type Fields = (keyof KitStats)[]
 
-const props = withDefaults(defineProps<KitStats & { shownFields: Fields }>(), {
+const props = withDefaults(defineProps<KitStats & { shownFields?: Fields }>(), {
   shownFields: () => ['kills', 'deaths', 'killDeathRatio', 'currWinstreak', 'bestWinstreak'],
 })
 

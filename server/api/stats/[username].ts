@@ -79,7 +79,10 @@ export default defineEventHandler(async (event) => {
       message: Object.values(ScrapeError).includes(statsRes.err) ? statsRes.err : UNKNOWN_ERROR,
     })
   } else {
-    return statsRes
+    return {
+      username: uuidRes._data!.name,
+      stats: statsRes,
+    }
   }
 })
 
