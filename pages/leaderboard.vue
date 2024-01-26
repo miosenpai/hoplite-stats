@@ -65,13 +65,12 @@
     >
       <template #username-data="{ row }">
         <NuxtLink
-          class="flex items-center gap-x-1.5"
           :to="`/stats/${row.username}`"
           :prefetch="false"
         >
           <img
             :src="`https://minotar.net/helm/${row.username}`"
-            class="h-4"
+            class="h-4 inline mb-0.5 mr-2"
           >
           <span>{{ row.username }}</span>
         </NuxtLink>
@@ -157,6 +156,7 @@ const { data: leaderboardData, pending } = await useFetch('/api/leaderboard', {
     gamemode: selectedMode,
     timespan: selectedTimespan,
   },
+  lazy: true,
 })
 
 watch(selectedCategory, (newCategory) => {
