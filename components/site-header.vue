@@ -2,27 +2,40 @@
   <header>
     <UContainer
       :class="[
-        'grid',
-        'grid-cols-4',
+        'py-4',
+        'flex',
         'items-center',
-        'py-4'
       ]"
     >
       <NuxtLink
         to="/"
-        :class="[prose, 'justify-self-start']"
+        :class="[
+          prose,
+          'justify-self-start',
+          'flex items-center',
+          'mr-auto',
+        ]"
       >
-        <h2>
-          <UIcon
-            name="i-mdi-chart-line"
-            class="align-[-0.175em]"
-          />
+        <UIcon
+          name="i-mdi-chart-areaspline-variant"
+          class="text-3xl mr-3"
+        />
+        <h2
+          :class="[
+            'm-0',
+            'hidden sm:block',
+            'pr-3'
+          ]"
+        >
           Hoplite Stats
         </h2>
       </NuxtLink>
       <PlayerSearch
         v-if="route.path !== '/'"
-        class="col-span-2"
+        :class="[
+          'flex-grow',
+          'max-w-lg'
+        ]"
       />
       <!--<UButton
         icon="i-mdi-github"
@@ -37,15 +50,14 @@
       <UButton
         icon="i-mdi-list-box"
         :class="[
-          'justify-self-end',
-          'col-start-4'
+          'ml-auto'
         ]"
         color="gray"
-        size="lg"
+        size="xl"
         variant="ghost"
         to="/leaderboard"
       >
-        Leaderboard
+        <span class="hidden sm:inline">Leaderboard</span>
       </UButton>
     </UContainer>
     <UDivider />
