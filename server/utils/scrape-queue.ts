@@ -18,8 +18,8 @@ type LeaderboardScrape = {
 }
 
 const scrapeQueue = fastq.promise(async (job: BattleRoyaleScrape | DuelsScrape | LeaderboardScrape) => {
-  const bot = await useBot()
   console.log(`Starting '${job.category}' Scrape:`, job)
+  const bot = await useBot()
   switch (job.category) {
     case 'battle-royale':
     case 'duels':

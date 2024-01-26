@@ -22,6 +22,7 @@ const createNewBot = async () => {
       return authCaches.get(authCacheOpts.cacheName)
     },
     version: '1.20.1',
+    checkTimeoutInterval: 60 * 1000,
   })
 
   const onResourcePack = () => {
@@ -48,9 +49,21 @@ const createNewBot = async () => {
     newBot.removeListener('error', console.log)
   }
 
+  const initConnTimeout = setTimeout(() => {
+    console.log('Bot: Initial Connection Timeout')
+    newBot.quit()
+  }, 75 * 1000)
+
+  let initConnTimeoutActive = true
+
   try {
     for await (const _ of on(newBot, 'spawn', { signal: initalConn.signal })) {
       connections += 1
+
+      if (initConnTimeoutActive) {
+        clearTimeout(initConnTimeout)
+        initConnTimeoutActive = false
+      }
 
       if (connections === 1)
         console.log('Bot Connected: Queue')
@@ -72,7 +85,10 @@ const createNewBot = async () => {
     (await import('prismarine-viewer')).mineflayer(newBot, { port: 3030 })
   }
 
-  inactiveDc = setTimeout(newBot.quit, dayjs.duration(runtimeCfg.bot.idleMinutes, 'minutes').asMilliseconds())
+  inactiveDc = setTimeout(
+    () => newBot.quit(),
+    dayjs.duration(runtimeCfg.bot.idleMinutes, 'minutes').asMilliseconds(),
+  )
 
   newBot.once('end', (reason) => {
     console.log('Bot DC:', reason)
