@@ -4,8 +4,8 @@
     :ui="{
       body: {
         base: [
-          'grid grid-cols-2 gap-x-12 gap-y-6',
-          'lg:grid-cols-3'
+          'grid gap-x-12 gap-y-6',
+          'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'
         ]
       }
     }"
@@ -73,15 +73,15 @@
     <div
       :class="[
         'grid gap-y-0.5 gap-x-12',
-        'col-span-2 lg:col-span-1',
+        'col-span-1 sm:col-span-2 lg:col-span-1',
         'h-fit',
-        'grid-cols-2 lg:grid-cols-1'
+        'grid-cols-1 sm:grid-cols-2 lg:grid-cols-1'
       ]"
     >
       <h3
         :class="[
           'mt-0',
-          'col-span-2 lg:col-span-1'
+          'col-span-1 sm:col-span-2 lg:col-span-1'
         ]"
       >
         Misc Stats

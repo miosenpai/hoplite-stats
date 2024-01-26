@@ -36,7 +36,7 @@
       </h1>
       <USelectMenu
         v-model="selectedCategory"
-        class="not-prose min-w-40 ml-auto"
+        class="not-prose w-40 ml-auto flex-shrink"
         :options="categories"
         size="lg"
         :disabled="pending"
@@ -73,7 +73,7 @@
       <div
         :class="[
           'grid',
-          'grid-cols-2',
+          'grid-cols-1 sm:grid-cols-2',
           'gap-6 pb-6'
         ]"
       >
@@ -86,16 +86,6 @@
           v-bind="(profileData as ProfileType<DuelsStats>).stats"
         />
       </div>
-      <!--<BattleRoyaleStats
-        v-if="selectedCategory === 'battle-royale'"
-        v-bind="(profileData as ProfileType<BattleRoyaleStats>).stats"
-        :username="username"
-      />
-      <DuelsStats
-        v-else-if="selectedCategory === 'duels'"
-        v-bind="(profileData as ProfileType<DuelsStats>).stats"
-        :username="username"
-      />-->
     </template>
   </UContainer>
 </template>
@@ -103,7 +93,6 @@
 <script setup lang="ts">
 import type { BattleRoyaleStats } from '@/server/utils/parsers/battle-royale'
 import type { DuelsStats } from '@/server/utils/parsers/duels'
-// import { useRouteQuery } from '@vueuse/router'
 
 type ProfileType<T> = { username: string, stats: T }
 
@@ -144,26 +133,30 @@ const { data: profileData, error, pending, refresh } = await useFetch(`/api/stat
 })
 
 watch(profileData, (newProfileData) => {
-  if (newProfileData && 'username' in newProfileData && !username.value) {
-    username.value = newProfileData.username
+  if (newProfileData) {
+    if ('username' in newProfileData && !username.value) {
+      username.value = newProfileData.username
+    }
+
+    // client only, SSE should not be subscribed during SSR
+    if (import.meta.client && 'sseToken' in newProfileData) {
+      const es = new EventSource(`/api/stats/${usernameParam}/sse?sseToken=${newProfileData.sseToken}`)
+
+      const onComplete = async () => {
+        es.close()
+        await refresh()
+        initalScrapeLoading.value = false
+        es.removeEventListener('complete', onComplete)
+      }
+
+      es.addEventListener('complete', onComplete)
+    }
   }
 }, { immediate: true })
 
-onMounted(() => {
+/* onMounted(() => {
   console.log('onMounted fired')
-  if (profileData.value && 'sseToken' in profileData.value) {
-    const es = new EventSource(`/api/stats/${usernameParam}/sse?sseToken=${profileData.value.sseToken}`)
-
-    const onComplete = async () => {
-      es.close()
-      await refresh()
-      initalScrapeLoading.value = false
-      es.removeEventListener('complete', onComplete)
-    }
-
-    es.addEventListener('complete', onComplete)
-  }
-})
+}) */
 
 watch(selectedCategory, (newCategory) => {
   router.push({ name: route.name!, query: { category: newCategory !== 'battle-royale' ? newCategory : undefined } })
