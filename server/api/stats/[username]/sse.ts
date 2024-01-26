@@ -29,9 +29,8 @@ export default defineEventHandler(async (event) => {
 
     // const data = query.category === 'battle-royale' ? battleRoyaleStats : duelsStats
     // event.node.res.write(`data: ${data}\n\n`)
-
   } catch {
-
+    // todo: implement once get*Stats can distinguish (and propel) unexpected errors
   }
 
   event._handled = true
