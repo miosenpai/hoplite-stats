@@ -15,6 +15,7 @@ const searchedName = ref('')
 async function navigateToStatsPage() {
   if (searchedName.value) {
     await navigateTo(`/stats/${searchedName.value}`)
+    searchedName.value = ''
   }
 }
 </script>
