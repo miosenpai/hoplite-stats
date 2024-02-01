@@ -52,7 +52,7 @@ const createNewBot = async () => {
   const initConnTimeout = setTimeout(() => {
     console.log('Bot: Initial Connection Timeout')
     newBot.quit()
-  }, 75 * 1000)
+  }, 45 * 1000)
 
   let initConnTimeoutActive = true
 
