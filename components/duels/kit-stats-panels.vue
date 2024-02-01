@@ -4,6 +4,10 @@
     :stats="props.sword"
   />
   <KitStatsPanel
+    class-name="Battle Royale"
+    :stats="props.battleRoyale"
+  />
+  <KitStatsPanel
     class-name="Axe"
     :stats="props.axe"
   />
@@ -12,12 +16,8 @@
     :stats="props.crystal"
   />
   <KitStatsPanel
-    class-name="UHC"
-    :stats="props.uhc"
-  />
-  <KitStatsPanel
-    class-name="Roulette Royale"
-    :stats="props.roulette"
+    class-name="Archer"
+    :stats="props.archer"
   />
   <KitStatsPanel
     class-name="Potion"
@@ -28,12 +28,16 @@
     :stats="props.netherPot"
   />
   <KitStatsPanel
-    class-name="Archer"
-    :stats="props.archer"
+    class-name="Boxing"
+    :stats="props.boxing"
   />
   <KitStatsPanel
-    class-name="Sumo"
-    :stats="props.sumo"
+    class-name="Bridge"
+    :stats="props.bridge"
+  />
+  <KitStatsPanel
+    class-name="Parkour"
+    :stats="props.parkour"
   />
 </template>
 

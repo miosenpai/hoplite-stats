@@ -18,14 +18,18 @@ export type DuelsStats = {
   custom: KitStats
   private: KitStats
   sword: KitStats
+  battleRoyale: KitStats
   axe: KitStats
   crystal: KitStats
-  uhc: KitStats
-  roulette: KitStats
+  archer: KitStats
   potion: KitStats
   netherPot: KitStats
-  archer: KitStats
-  sumo: KitStats
+  boxing: KitStats
+  bridge: KitStats
+  parkour: KitStats
+  // uhc: KitStats
+  // roulette: KitStats
+  // sumo: KitStats
 }
 
 const kitStatsQuery = jsonata(`$[customName.text = $kitNameText]{
@@ -47,19 +51,20 @@ const parseKitStats = (statsWindowItems: any, kitName: string) => {
   return kitStatsQuery.evaluate(statsWindowItems, { kitNameText: `${kitName} Stats` })
 }
 
-export const parseDuelsStats = async (statsWindowItems: any) => {
+export const parseDuelsStats = async (statsWindowItems: any): Promise<DuelsStats> => {
   return {
     casual: await parseKitStats(statsWindowItems, 'Casual'),
     custom: await parseKitStats(statsWindowItems, 'Custom'),
     private: await parseKitStats(statsWindowItems, 'Private'),
     sword: await parseKitStats(statsWindowItems, 'Sword'),
+    battleRoyale: await parseKitStats(statsWindowItems, 'Battle Royale'),
     axe: await parseKitStats(statsWindowItems, 'Axe'),
     crystal: await parseKitStats(statsWindowItems, 'Crystal'),
-    uhc: await parseKitStats(statsWindowItems, 'UHC'),
-    roulette: await parseKitStats(statsWindowItems, 'Roulette Royale'),
+    archer: await parseKitStats(statsWindowItems, 'Archer'),
     potion: await parseKitStats(statsWindowItems, 'Potion'),
     netherPot: await parseKitStats(statsWindowItems, 'NetherPot'),
-    archer: await parseKitStats(statsWindowItems, 'Archer'),
-    sumo: await parseKitStats(statsWindowItems, 'Sumo'),
-  } as DuelsStats
+    boxing: await parseKitStats(statsWindowItems, 'Boxing'),
+    bridge: await parseKitStats(statsWindowItems, 'Bridge'),
+    parkour: await parseKitStats(statsWindowItems, 'Parkour'),
+  }
 }

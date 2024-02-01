@@ -10,7 +10,7 @@ const STATS_BTN_MAP = {
 
 const STATS_ITEMS_COUNT = {
   'battle-royale': 6,
-  'duels': 13,
+  'duels': 14,
 }
 
 const ERROR_CHAT_PATTERNS = [
