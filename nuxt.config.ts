@@ -25,8 +25,7 @@ export default defineNuxtConfig({
     '@fontsource-variable/dm-sans',
   ],
   ui: {
-    // causes build OOM error, switched to dynamic for now
-    // icons: ['mdi'],
+    icons: 'all',
   },
   tailwindcss: {
     viewer: false,

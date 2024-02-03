@@ -16,8 +16,9 @@
   },
   "devDependencies": {
     "@fontsource-variable/dm-sans": "^5.0.3",
+    "@iconify/json": "^2.2.179",
     "@nuxt/eslint-config": "^0.2.0",
-    "@nuxt/ui": "^2.12.3",
+    "@nuxt/ui": "npm:@nuxt/ui-edge@2.13.0-28444916.412cd75",
     "@playwright/test": "^1.41.0",
     "@stylistic/eslint-plugin": "^1.5.1",
     "@vueuse/core": "^10.7.2",
@@ -42,6 +43,7 @@
     "zod": "^3.22.4"
   },
   "/": {
-    "overrides": "https://github.com/nuxt/ui/issues/1171"
+    "overrides/vue": "https://github.com/nuxt/ui/issues/1171",
+    "overrides/nuxt-ui": "https://github.com/nuxt/ui/issues/1237"
   }
 }
