@@ -6,6 +6,16 @@
   <SiteFooter />
 </template>
 
+<script setup lang="ts">
+
+useHead({
+  titleTemplate: (partialTitle) => {
+    return partialTitle ? `${partialTitle} - Hoplite Stats` : 'Hoplite Stats'
+  },
+})
+
+</script>
+
 <style>
 #__nuxt {
   @apply grid min-h-screen;

@@ -180,4 +180,8 @@ watch(selectedTimespan, (newTimespan) => {
   } })
 })
 
+useHead({
+  title: 'Leaderboard',
+})
+
 </script>

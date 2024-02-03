@@ -154,12 +154,12 @@ watch(profileData, (newProfileData) => {
   }
 }, { immediate: true })
 
-/* onMounted(() => {
-  console.log('onMounted fired')
-}) */
-
 watch(selectedCategory, (newCategory) => {
   router.push({ name: route.name!, query: { category: newCategory !== 'battle-royale' ? newCategory : undefined } })
+})
+
+useHead({
+  title: username,
 })
 
 // defineOgImageScreenshot()
