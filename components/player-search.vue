@@ -2,11 +2,28 @@
   <UInput
     v-model="searchedName"
     placeholder="Player Name"
-    icon="i-heroicons-magnifying-glass"
-    trailing
     size="lg"
+    :ui="{
+      icon: {
+        trailing: {
+          pointer: '',
+          padding: {
+            lg: 'px-1'
+          }
+        }
+      }
+    }"
     @keyup.enter="navigateToStatsPage"
-  />
+  >
+    <template #trailing>
+      <UButton
+        icon="i-heroicons-magnifying-glass"
+        variant="ghost"
+        color="gray"
+        @click="navigateToStatsPage"
+      />
+    </template>
+  </UInput>
 </template>
 
 <script setup lang="ts">
