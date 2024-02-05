@@ -1,6 +1,7 @@
 import mineflayer from 'mineflayer'
 import { on } from 'node:events'
 import { pathfinder } from 'mineflayer-pathfinder'
+import type { ChatMessage } from 'prismarine-chat'
 
 let bot: mineflayer.Bot | null = null
 
@@ -32,6 +33,16 @@ const createNewBot = async () => {
 
   newBot.on('resourcePack', onResourcePack)
 
+  const onAfkMsg = (jsonMsg: ChatMessage) => {
+    // future: investigate which field the text is actually in
+    if (JSON.stringify(jsonMsg.json).includes('You are AFK')) {
+      newBot.setControlState('jump', true)
+      newBot.setControlState('jump', false)
+    }
+  }
+
+  newBot.on('actionBar', onAfkMsg)
+
   newBot.on('kicked', console.log)
   newBot.on('error', console.log)
 
@@ -45,6 +56,8 @@ const createNewBot = async () => {
 
   const cleanUpListeners = () => {
     newBot.removeListener('resourcePack', onResourcePack)
+    newBot.removeListener('actionBar', onAfkMsg)
+
     newBot.removeListener('kicked', console.log)
     newBot.removeListener('error', console.log)
   }
