@@ -18,7 +18,7 @@ export default defineEventHandler(async (event) => {
   if (uuidRes.status === 404 || uuidRes._data!.demo) {
     throw createError({
       statusCode: 404,
-      message: ScrapeError.INVALID_USERNAME,
+      message: ScrapeError.PROFILE_NOT_FOUND,
     })
   }
 
@@ -39,18 +39,6 @@ export default defineEventHandler(async (event) => {
     if (!currKeys.some(k => k.includes('duels')))
       getDuelsStats(uuidRes._data!.id, uuidRes._data!.name)
 
-    // we use uuid as job key, to not add duplicate scapes
-    /* const scrapeInProgress = scrapeQueue.getQueue().find(j => j.category === query.category && j.username === uuidRes._data!.name)
-    if (!scrapeInProgress) {
-      switch (query.category) {
-        case 'battle-royale':
-          getBattleRoyaleStats(uuidRes._data!.id, uuidRes._data!.name)
-          break
-        case 'duels':
-          getDuelsStats(uuidRes._data!.id, uuidRes._data!.name)
-          break
-      }
-    } */
     setResponseStatus(event, 202)
 
     const runtimeCfg = useRuntimeConfig()
@@ -75,8 +63,8 @@ export default defineEventHandler(async (event) => {
 
   if ('err' in statsRes) {
     throw createError({
-      statusCode: [ScrapeError.NO_HOPLITE_PROFILE].includes(statsRes.err) ? 404 : 500,
-      message: Object.values(ScrapeError).includes(statsRes.err) ? statsRes.err : UNKNOWN_ERROR,
+      statusCode: errorToStatusCode(statsRes.err),
+      message: statsRes.err,
     })
   } else {
     return {
@@ -94,8 +82,10 @@ export const getBattleRoyaleStats = defineCachedFunction(async (uuid: string, us
 
     return scrapeRes
   } catch (err: any) { // must catch here, if defineCachedFunction errors it will infinitely return a cached res
-    console.log(err)
-    return { err: err.message }
+    if (Object.values(ScrapeError).includes(err.message)) {
+      return { err: err.message }
+    }
+    throw err
   }
 }, {
   // todo: figure out a good cache duration for stats
@@ -114,8 +104,10 @@ export const getDuelsStats = defineCachedFunction(async (uuid: string, username:
 
     return scrapeRes
   } catch (err: any) { // must catch here, if defineCachedFunction errors it will infinitely return a cached res
-    console.log(err)
-    return { err: err.message }
+    if (Object.values(ScrapeError).includes(err.message)) {
+      return { err: err.message }
+    }
+    throw err
   }
 }, {
   maxAge: dayjs.duration(1, 'hours').asSeconds(),

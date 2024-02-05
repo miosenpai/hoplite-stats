@@ -1,5 +1,4 @@
 import { z } from 'zod'
-import type { LeaderboardEntry } from '@/server/utils/parsers/leaderboard'
 
 const querySchema = z.object({
   gamemode: z.union([
@@ -20,11 +19,6 @@ const QUERY_COMBOS = ['solo', 'civ'].reduce((prev, curr: string) => {
   prev.push(...combos)
   return prev
 }, [] as { gamemode: string, timespan: string }[])
-
-type LeaderboardRes = {
-  wins: LeaderboardEntry[]
-  kills: LeaderboardEntry[]
-}
 
 export default defineEventHandler(async (event) => {
   const query = await getValidatedQuery(event, query => querySchema.parse(query))
@@ -49,11 +43,11 @@ export default defineEventHandler(async (event) => {
 
   if ('err' in leaderboardRes) {
     throw createError({
-      statusCode: [ScrapeError.NO_HOPLITE_PROFILE].includes(leaderboardRes.err) ? 404 : 500,
-      message: Object.values(ScrapeError).includes(leaderboardRes.err) ? leaderboardRes.err : UNKNOWN_ERROR,
+      statusCode: errorToStatusCode(leaderboardRes.err),
+      message: leaderboardRes.err,
     })
   } else {
-    return leaderboardRes as LeaderboardRes
+    return leaderboardRes
   }
 })
 
@@ -65,8 +59,10 @@ export const getLeaderboard = defineCachedFunction(async (gamemode: string, time
 
     return scrapeRes
   } catch (err: any) {
-    console.log(err)
-    return { err: err.message }
+    if (Object.values(ScrapeError).includes(err.message)) {
+      return { err: err.message }
+    }
+    throw err
   }
 }, {
   name: 'leaderboard',

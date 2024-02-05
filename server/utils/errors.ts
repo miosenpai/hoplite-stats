@@ -1,6 +1,14 @@
 export enum ScrapeError {
-  NO_HOPLITE_PROFILE = 'NO_HOPLITE_PROFILE',
-  INVALID_USERNAME = 'INVALID_USERNAME',
+  PROFILE_NOT_FOUND = 'PROFILE_NOT_FOUND',
 }
 
 export const UNKNOWN_ERROR = 'UNKNOWN_ERROR'
+
+export function errorToStatusCode(error: string) {
+  switch (error) {
+    case ScrapeError.PROFILE_NOT_FOUND:
+      return 404
+    default:
+      return 500
+  }
+}

@@ -39,7 +39,7 @@ export const scrapeWindowStats = async (bot: Bot, username: string, category: 'b
   try {
     statsMenu = (await once(bot, 'windowOpen', { signal: statsErrMsg.signal }))[0] as Window
   } catch (err) {
-    throw Error(ScrapeError.NO_HOPLITE_PROFILE)
+    throw Error(ScrapeError.PROFILE_NOT_FOUND)
   } finally {
     bot.removeListener('message', errMsgObserver)
   }
