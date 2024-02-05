@@ -54,7 +54,7 @@ const parseKitStats = (statsWindowItems: any, kitName: string) => {
 export const parseDuelsStats = async (statsWindowItems: any): Promise<DuelsStats> => {
   return {
     casual: await parseKitStats(statsWindowItems, 'Casual'),
-    custom: await parseKitStats(statsWindowItems, 'Custom Kit'),
+    custom: await parseKitStats(statsWindowItems, 'Custom'),
     private: await parseKitStats(statsWindowItems, 'Private'),
     sword: await parseKitStats(statsWindowItems, 'Sword'),
     battleRoyale: await parseKitStats(statsWindowItems, 'Battle Royale'),
