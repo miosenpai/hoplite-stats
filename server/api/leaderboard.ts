@@ -29,11 +29,9 @@ export default defineEventHandler(async (event) => {
 
   // first scrape
   if (currKeys.length !== QUERY_COMBOS.length) {
-    const { scrapeQueue } = useScrapeQueue()
-
-    const scrapeInProgress = scrapeQueue.getQueue().some(j => j.category === 'leaderboard')
-    if (!scrapeInProgress)
-      QUERY_COMBOS.forEach(q => getLeaderboard(q.gamemode, q.timespan))
+    QUERY_COMBOS
+      .filter(q => !currKeys.includes(`nitro:functions:leaderboard:${q.gamemode}:${q.timespan}.json`))
+      .forEach(q => getLeaderboard(q.gamemode, q.timespan))
 
     setResponseStatus(event, 202)
     return
