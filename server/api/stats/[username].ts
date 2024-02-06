@@ -33,11 +33,11 @@ export default defineEventHandler(async (event) => {
     // const { scrapeQueue } = useScrapeQueue()
 
     // don't need to worry about duplicate initial scrapes (cachedFunction doesn't rerun when one's pending)
-    if (!currKeys.some(k => k.includes('battle-royale')))
+    /* if (!currKeys.some(k => k.includes('battle-royale')))
       getBattleRoyaleStats(uuidRes._data!.id, uuidRes._data!.name)
 
     if (!currKeys.some(k => k.includes('duels')))
-      getDuelsStats(uuidRes._data!.id, uuidRes._data!.name)
+      getDuelsStats(uuidRes._data!.id, uuidRes._data!.name) */
 
     setResponseStatus(event, 202)
 

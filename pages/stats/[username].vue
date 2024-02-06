@@ -1,13 +1,13 @@
 <template>
   <UContainer
-    v-if="error || initalScrapeLoading || !username"
+    v-if="errorCode || initalScrapeLoading || !username"
     :class="[prose, 'flex flex-col justify-center min-h-full']"
   >
     <h1
-      v-if="error"
+      v-if="errorCode"
       class="text-center"
     >
-      Error: {{ error.statusCode === 404 ? 'Failed to find player.' : 'Unexpected error occurred.' }}
+      Error: {{ errorCode === 404 ? 'Failed to find player.' : 'Unexpected error occurred.' }}
     </h1>
     <template v-else>
       <h1
@@ -132,6 +132,10 @@ const { data: profileData, error, pending, refresh } = await useFetch(`/api/stat
   lazy: true,
 })
 
+const sseError = ref(0)
+
+const errorCode = computed(() => error.value?.statusCode || sseError.value)
+
 watch(profileData, (newProfileData) => {
   if (newProfileData) {
     if ('username' in newProfileData && !username.value) {
@@ -147,9 +151,19 @@ watch(profileData, (newProfileData) => {
         await refresh()
         initalScrapeLoading.value = false
         es.removeEventListener('complete', onComplete)
+        es.removeEventListener('fail', onFail)
+      }
+
+      const onFail = async () => {
+        es.close()
+        sseError.value = 500
+        initalScrapeLoading.value = false
+        es.removeEventListener('complete', onComplete)
+        es.removeEventListener('fail', onFail)
       }
 
       es.addEventListener('complete', onComplete)
+      es.addEventListener('fail', onFail)
     }
   }
 }, { immediate: true })
