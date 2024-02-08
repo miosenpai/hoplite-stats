@@ -17,11 +17,11 @@ const createNewBot = async () => {
     auth: 'microsoft',
     host: runtimeCfg.bot.serverHost,
     // @ts-ignore
-    profilesFolder: (authCacheOpts: Parameters<typeof createAuthCache>[0]) => {
+    /* profilesFolder: (authCacheOpts: Parameters<typeof createAuthCache>[0]) => {
       if (!authCaches.has(authCacheOpts.cacheName))
         authCaches.set(authCacheOpts.cacheName, createAuthCache(authCacheOpts))
       return authCaches.get(authCacheOpts.cacheName)
-    },
+    }, */
     version: '1.20.1',
     checkTimeoutInterval: 60 * 1000,
   })

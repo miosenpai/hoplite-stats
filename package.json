@@ -7,7 +7,7 @@
     "dev": "nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
-    "postinstall": "nuxt prepare",
+    "postinstall": "cross-env NODE_OPTIONS=\"--max-old-space-size=8192\" nuxt prepare",
     "lint": "eslint .",
     "start": "node .output/server/index.mjs"
   },
