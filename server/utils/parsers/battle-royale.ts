@@ -7,6 +7,10 @@ export type OverallStats = {
   assists: number
   // seconds
   playtime: number
+  customCrafts: number
+  legendaryCrafts: number
+  legendaryKills: number
+  avgTimeSurvived: number
 }
 
 export type ClassStats = {
@@ -22,13 +26,9 @@ export type ClassStats = {
 }
 
 export type OverallStatsFields = {
-  total: OverallStats
   solo: OverallStats
+  duo: OverallStats
   civ: OverallStats
-  legendaryCrafts: number
-  legendaryKills: number
-  // seconds
-  avgTimeSurvived: number
 }
 
 export type ClassStatsFields = {
@@ -54,28 +54,13 @@ const classStatsQuery = jsonata(`$[customName.text = $classNameText]{
 
 classStatsQuery.assign('parsePlaytime', parsePlaytime)
 
-const overallStatsQuery = jsonata(`$[customName.text = 'Overall Stats']{
-  'total': {
-    'games': $number(customLore[text = 'Games Played: '].extra.text),
-    'wins': $number(customLore[text = 'Total Wins: '].extra.text),
-    'kills': $number(customLore[text = 'Total Kills: '].extra.text),
-    'assists': $number(customLore[text = 'Total Assists: '].extra.text),
-    'playtime': $parsePlaytime(customLore[text = 'Total Playtime: '].extra.text)
-  },
-  'solo': {
-    'games': $number(customLore[text = 'Solo Games Played: '].extra.text),
-    'wins': $number(customLore[text = 'Solo Wins: '].extra.text),
-    'kills': $number(customLore[text = 'Solo Kills: '].extra.text),
-    'assists': $number(customLore[text = 'Solo Assists: '].extra.text),
-    'playtime': $parsePlaytime(customLore[text = 'Solo Playtime: '].extra.text)
-  },
-  'civ': {
-    'games': $number(customLore[text = 'Civ Games Played: '].extra.text),
-    'wins': $number(customLore[text = 'Civ Wins: '].extra.text),
-    'kills': $number(customLore[text = 'Civ Kills: '].extra.text),
-    'assists': $number(customLore[text = 'Civ Assists: '].extra.text),
-    'playtime': $parsePlaytime(customLore[text = 'Civ Playtime: '].extra.text)
-  },
+const overallStatsQuery = jsonata(`$[customName.text = $queueNameText]{
+  'games': $number(customLore[text = 'Games Played: '].extra.text),
+  'wins': $number(customLore[text = 'Wins: '].extra.text),
+  'kills': $number(customLore[text = 'Kills: '].extra.text),
+  'assists': $number(customLore[text = 'Assists: '].extra.text),
+  'playtime': $parsePlaytime(customLore[text = 'Playtime: '].extra.text),
+  'customCrafts': $number(customLore[text = 'Custom Crafts Crafted: '].extra.text),
   'legendaryCrafts': $number(customLore[text = 'Legendary Weapons Crafted: '].extra.text),
   'legendaryKills': $number(customLore[text = 'Legendary Weapon Kills: '].extra.text),
   'avgTimeSurvived': $parsePlaytime(customLore[text = 'Average Time Survived: '].extra.text)
@@ -87,8 +72,16 @@ const parseClassStats = (brStatsItems: any, className: string) => {
   return classStatsQuery.evaluate(brStatsItems, { classNameText: `${className} Stats` }) as Promise<ClassStats>
 }
 
+const parseOverallStats = (overallStatsItems: any, queueName: string) => {
+  return overallStatsQuery.evaluate(overallStatsItems, { queueNameText: `${queueName} Stats` }) as Promise<OverallStats>
+}
+
 export const parseBattleRoyaleStats = async (brStatsItems: any): Promise<BattleRoyaleStats> => {
-  const overallStats = await overallStatsQuery.evaluate(brStatsItems) as OverallStatsFields
+  const overallStats: OverallStatsFields = {
+    solo: await parseOverallStats(brStatsItems, 'Solo'),
+    duo: await parseOverallStats(brStatsItems, 'Duo'),
+    civ: await parseOverallStats(brStatsItems, 'Civilization'),
+  }
 
   const classStats: ClassStatsFields = {
     miner: await parseClassStats(brStatsItems, 'Miner'),

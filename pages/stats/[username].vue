@@ -55,8 +55,10 @@
         <img
           :src="`https://minotar.net/helm/${username}`"
           :class="[
-            'w-[242px] flex-shrink-0',
-            'hidden lg:block'
+            'flex-shrink-0',
+            'hidden lg:block',
+            'self-start',
+            'w-56'
           ]"
         >
         <OverallStatsPanel

@@ -14,67 +14,22 @@
       <h3 class="mt-0">
         Solo Stats
       </h3>
-      <StatRow
-        icon="i-mdi-parachute"
-        name="Games"
-        :value="props.solo.games"
-      />
-      <StatRow
-        icon="i-mdi-crown"
-        name="Wins"
-        :value="props.solo.wins"
-      />
-      <StatRow
-        icon="i-mdi-sword"
-        name="Kills"
-        :value="props.solo.kills"
-      />
-      <StatRow
-        icon="i-mdi-sword-cross"
-        name="Assists"
-        :value="props.solo.assists"
-      />
-      <StatRow
-        icon="i-mdi-clock-outline"
-        name="Playtime"
-        :value="formatPlaytime(props.solo.playtime)"
+      <OverallStatsList
+        v-bind="props.solo"
       />
     </div>
     <div class="grid gap-y-0.5">
       <h3 class="mt-0">
-        Civilization Stats
+        Duo Stats
       </h3>
-      <StatRow
-        icon="i-mdi-parachute"
-        name="Games"
-        :value="props.civ.games"
-      />
-      <StatRow
-        icon="i-mdi-crown"
-        name="Wins"
-        :value="props.civ.wins"
-      />
-      <StatRow
-        icon="i-mdi-sword"
-        name="Kills"
-        :value="props.civ.kills"
-      />
-      <StatRow
-        icon="i-mdi-sword-cross"
-        name="Assists"
-        :value="props.civ.assists"
-      />
-      <StatRow
-        icon="i-mdi-clock-outline"
-        name="Playtime"
-        :value="formatPlaytime(props.civ.playtime)"
+      <OverallStatsList
+        v-bind="props.duo"
       />
     </div>
     <div
       :class="[
         'grid gap-y-0.5 gap-x-12',
         'col-span-1 sm:col-span-2 lg:col-span-1',
-        'h-fit',
         'grid-cols-1 sm:grid-cols-2 lg:grid-cols-1'
       ]"
     >
@@ -84,22 +39,10 @@
           'col-span-1 sm:col-span-2 lg:col-span-1'
         ]"
       >
-        Misc Stats
+        Civilization Stats
       </h3>
-      <StatRow
-        icon="i-mdi-anvil"
-        name="Legendary Crafts"
-        :value="props.legendaryCrafts"
-      />
-      <StatRow
-        icon="i-mdi-sword"
-        name="Legendary Kills"
-        :value="props.legendaryKills"
-      />
-      <StatRow
-        icon="i-mdi-clock-outline"
-        name="Avg Time Alive"
-        :value="formatPlaytime(props.avgTimeSurvived)"
+      <OverallStatsList
+        v-bind="props.civ"
       />
     </div>
   </UCard>
