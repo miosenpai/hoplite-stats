@@ -25,11 +25,7 @@ const scrapeQueue = fastq.promise(async (job: BattleRoyaleScrape | DuelsScrape |
     case 'duels':
       return scrapeWindowStats(bot, job.username, job.category)
     case 'leaderboard': {
-      const res = await scrapeLeaderboard(bot, job.gamemode, job.timespan)
-      // todo: move this logic to the leaderboard scraper itself
-      // this timeout is important to not trigger hologram action cooldown
-      await timer.setTimeout(4000)
-      return res
+      return scrapeLeaderboard(bot, job.gamemode, job.timespan)
     }
   }
 }, 1)
