@@ -10,6 +10,7 @@ export default defineNuxtConfig({
     bot: {
       idleMinutes: 10,
       serverHost: '',
+      serverPort: 25565,
       authName: '',
     },
     redisHost: '',

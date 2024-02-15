@@ -16,6 +16,7 @@ const createNewBot = async () => {
     username: runtimeCfg.bot.authName,
     auth: 'microsoft',
     host: runtimeCfg.bot.serverHost,
+    port: runtimeCfg.bot.serverPort,
     // @ts-ignore
     /* profilesFolder: (authCacheOpts: Parameters<typeof createAuthCache>[0]) => {
       if (!authCaches.has(authCacheOpts.cacheName))
