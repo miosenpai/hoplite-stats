@@ -55,7 +55,7 @@
         color="gray"
         size="xl"
         variant="ghost"
-        to="/leaderboard"
+        to="/leaderboard/battle-royale"
       >
         <span class="hidden sm:inline">Leaderboard</span>
       </UButton>
