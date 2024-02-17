@@ -5,8 +5,6 @@ import timer from 'node:timers/promises'
 
 let bot: mineflayer.Bot | null = null
 
-const authCaches = new Map<string, ReturnType<typeof createAuthCache>>()
-
 let inactiveDc: NodeJS.Timeout | null = null
 
 let afk = false
@@ -19,12 +17,6 @@ const createNewBot = async () => {
     auth: 'microsoft',
     host: runtimeCfg.bot.serverHost,
     port: runtimeCfg.bot.serverPort,
-    // @ts-ignore
-    /* profilesFolder: (authCacheOpts: Parameters<typeof createAuthCache>[0]) => {
-      if (!authCaches.has(authCacheOpts.cacheName))
-        authCaches.set(authCacheOpts.cacheName, createAuthCache(authCacheOpts))
-      return authCaches.get(authCacheOpts.cacheName)
-    }, */
     version: '1.20.1',
     checkTimeoutInterval: 60 * 1000,
   })
