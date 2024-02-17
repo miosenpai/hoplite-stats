@@ -99,7 +99,6 @@ import type { DuelsStats } from '@/server/utils/parsers/duels'
 type ProfileType<T> = { username: string, stats: T }
 
 const route = useRoute()
-const router = useRouter()
 
 const categoryQuery = route.query.category as string | undefined
 
@@ -146,7 +145,7 @@ watch(profileData, (newProfileData) => {
 
     // client only, SSE should not be subscribed during SSR
     if (import.meta.client && 'sseToken' in newProfileData) {
-      const es = new EventSource(`/api/stats/${usernameParam}/sse?sseToken=${newProfileData.sseToken}`)
+      const es = new EventSource(`/api/stats-sse?sseToken=${newProfileData.sseToken}`)
 
       const onComplete = async () => {
         es.close()
@@ -170,8 +169,8 @@ watch(profileData, (newProfileData) => {
   }
 }, { immediate: true })
 
-watch(selectedCategory, (newCategory) => {
-  router.push({ name: route.name!, query: { category: newCategory !== 'battle-royale' ? newCategory : undefined } })
+watch(selectedCategory, async (newCategory) => {
+  await navigateTo({ name: route.name!, query: { category: newCategory !== 'battle-royale' ? newCategory : undefined } })
 })
 
 useHead({
