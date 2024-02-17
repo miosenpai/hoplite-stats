@@ -25,7 +25,7 @@ export default defineEventHandler(async (event) => {
 
   const cacheStore = useStorage('cache')
 
-  const currKeys = await cacheStore.getKeys('nitro:functions:leaderboard')
+  /* const currKeys = await cacheStore.getKeys('nitro:functions:leaderboard')
 
   // first scrape
   if (currKeys.length !== QUERY_COMBOS.length) {
@@ -35,9 +35,18 @@ export default defineEventHandler(async (event) => {
 
     setResponseStatus(event, 202)
     return
+  } */
+
+  const cached = await cacheStore
+    .hasItem(`nitro:functions:leaderboard:${query.gamemode}:${query.timespan}.json`)
+
+  if (!cached) {
+    getBattleRoyaleLeaderboard(query.gamemode, query.timespan)
+    setResponseStatus(event, 202)
+    return
   }
 
-  const leaderboardRes = await getLeaderboard(query.gamemode, query.timespan)
+  const leaderboardRes = await getBattleRoyaleLeaderboard(query.gamemode, query.timespan)
 
   if ('err' in leaderboardRes) {
     throw createError({
@@ -49,11 +58,11 @@ export default defineEventHandler(async (event) => {
   }
 })
 
-export const getLeaderboard = defineCachedFunction(async (gamemode: string, timespan: string) => {
+const getBattleRoyaleLeaderboard = defineCachedFunction(async (gamemode: string, timespan: string) => {
   const { addScrapeJob } = useScrapeQueue()
 
   try {
-    const scrapeRes = await addScrapeJob({ category: 'leaderboard', gamemode, timespan })
+    const scrapeRes = await addScrapeJob({ category: 'battle-royale-leaderboard', gamemode, timespan })
 
     return scrapeRes
   } catch (err: any) {

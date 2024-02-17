@@ -1,28 +1,34 @@
 <template>
   <UContainer>
     <div
-      class="grid header-grid py-4"
-      :class="[prose, 'max-w-none']"
+      class="flex items-center py-4 flex-wrap gap-y-4"
+      :class="[
+        prose,
+        'max-w-none',
+        'justify-center'
+      ]"
     >
-      <UTabs
-        v-model="selectedTabIdx"
-        :items="tabs"
-        :ui="{ wrapper: 'space-y-0' }"
-        class="max-w-72"
-      />
       <h1
         :class="[
           'm-0',
+          'w-full',
+          'text-center'
         ]"
       >
         Leaderboard
       </h1>
+      <UTabs
+        v-model="selectedTabIdx"
+        :items="tabs"
+        :ui="{ wrapper: 'space-y-0' }"
+        :class="[
+          'mr-4 min-w-64',
+        ]"
+      />
       <div
         id="leaderboard-opts"
         :class="[
           'flex gap-x-4',
-          'w-full md:w-auto',
-          'justify-end'
         ]"
       />
     </div>
@@ -56,9 +62,3 @@ const selectedTabIdx = computed({
 })
 
 </script>
-
-<style scoped>
-.header-grid {
-  grid-template-columns: 1fr auto 1fr;
-}
-</style>

@@ -120,6 +120,9 @@ const createNewBot = async () => {
   }
 
   newBot.loadPlugin(pathfinder)
+  const movement = new Movements(newBot)
+  movement.canDig = false
+  newBot.pathfinder.setMovements(movement)
 
   if (import.meta.dev) {
     (await import('prismarine-viewer')).mineflayer(newBot, { port: 3030 })

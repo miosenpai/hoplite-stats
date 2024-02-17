@@ -132,7 +132,7 @@ const timespans = [
 
 const selectedTimespan = ref(timespans.map(t => t.timespan).includes(timespanQuery!) ? timespanQuery! : 'lifetime')
 
-const { data: leaderboardData, pending } = await useFetch('/api/leaderboard', {
+const { data: leaderboardData, pending } = await useFetch('/api/leaderboard/battle-royale', {
   query: {
     gamemode: selectedMode,
     timespan: selectedTimespan,
