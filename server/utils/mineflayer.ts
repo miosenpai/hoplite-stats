@@ -1,13 +1,15 @@
 import mineflayer from 'mineflayer'
-import { on } from 'node:events'
-import { pathfinder } from 'mineflayer-pathfinder'
-import type { ChatMessage } from 'prismarine-chat'
+import { on, once } from 'node:events'
+import { pathfinder, Movements } from 'mineflayer-pathfinder'
+import timer from 'node:timers/promises'
 
 let bot: mineflayer.Bot | null = null
 
 const authCaches = new Map<string, ReturnType<typeof createAuthCache>>()
 
 let inactiveDc: NodeJS.Timeout | null = null
+
+let afk = false
 
 const createNewBot = async () => {
   const runtimeCfg = useRuntimeConfig()
@@ -34,15 +36,39 @@ const createNewBot = async () => {
 
   newBot.on('resourcePack', onResourcePack)
 
-  const onAfkMsg = (jsonMsg: ChatMessage) => {
-    // future: investigate which field the text is actually in
-    if (JSON.stringify(jsonMsg.json).includes('You are AFK')) {
-      newBot.setControlState('jump', true)
-      newBot.setControlState('jump', false)
+  const onAfkMsg = async (actionBarMsg: { text: string }) => {
+    if (actionBarMsg.text.includes('AFK') && !afk) {
+      afk = true
+      await once(newBot, 'respawn')
+      console.log('Entered AFK Lobby')
+      await timer.setTimeout(10 * 1000)
+
+      // the limbo server's a subset of a full MC server, breaks mineflayer ticks so this doesn't work
+      // newBot.look(newBot.entity.yaw + 10, newBot.entity.pitch, true)
+
+      const originalYaw = newBot.entity.yaw
+      let offset = 1
+
+      const rotateTask = setInterval(() => {
+        newBot._client.write('look', {
+          yaw: originalYaw + offset,
+          pitch: newBot.entity.pitch,
+          onGround: true,
+        })
+        offset += 1
+      }, 100)
+
+      await once(newBot, 'respawn')
+
+      clearInterval(rotateTask)
+
+      console.log('Exited AFK Lobby')
+      afk = false
     }
   }
 
-  newBot.on('actionBar', onAfkMsg)
+  afk = false
+  newBot._client.on('action_bar', onAfkMsg)
 
   newBot.on('kicked', console.log)
   newBot.on('error', console.log)
@@ -57,7 +83,7 @@ const createNewBot = async () => {
 
   const cleanUpListeners = () => {
     newBot.removeListener('resourcePack', onResourcePack)
-    newBot.removeListener('actionBar', onAfkMsg)
+    newBot._client.removeListener('action_bar', onAfkMsg)
 
     newBot.removeListener('kicked', console.log)
     newBot.removeListener('error', console.log)
