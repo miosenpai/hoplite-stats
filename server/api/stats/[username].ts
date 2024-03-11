@@ -75,10 +75,14 @@ export default defineEventHandler(async (event) => {
 })
 
 export const getBattleRoyaleStats = defineCachedFunction(async (uuid: string, username: string) => {
-  const { addScrapeJob } = useScrapeQueue()
+  const scrapeQueue = useScrapeQueue()
 
   try {
-    const scrapeRes = await addScrapeJob({ username, category: 'battle-royale' })
+    const scrapeRes = await scrapeQueue.add(async () => {
+      console.log('Starting BR Stats Scrape:', username)
+      const bot = await useBot()
+      return scrapeWindowStats(bot, username, 'battle-royale')
+    }, { throwOnTimeout: true })
 
     return scrapeRes
   } catch (err: any) { // must catch here, if defineCachedFunction errors it will infinitely return a cached res
@@ -97,10 +101,14 @@ export const getBattleRoyaleStats = defineCachedFunction(async (uuid: string, us
 })
 
 export const getDuelsStats = defineCachedFunction(async (uuid: string, username: string) => {
-  const { addScrapeJob } = useScrapeQueue()
+  const scrapeQueue = useScrapeQueue()
 
   try {
-    const scrapeRes = await addScrapeJob({ username, category: 'duels' })
+    const scrapeRes = await scrapeQueue.add(async () => {
+      console.log('Starting Duels Stats Scrape:', username)
+      const bot = await useBot()
+      return scrapeWindowStats(bot, username, 'duels')
+    }, { throwOnTimeout: true })
 
     return scrapeRes
   } catch (err: any) { // must catch here, if defineCachedFunction errors it will infinitely return a cached res

@@ -57,10 +57,14 @@ export default defineEventHandler(async (event) => {
 })
 
 const getDuelsLeaderboard = defineCachedFunction(async (kit: string, teamSize: number, timespan: string) => {
-  const { addScrapeJob } = useScrapeQueue()
+  const scrapeQueue = useScrapeQueue()
 
   try {
-    const scrapeRes = await addScrapeJob({ category: 'duels-leaderboard', kit, teamSize, timespan })
+    const scrapeRes = await scrapeQueue.add(async () => {
+      console.log('Starting Duels Leaderboard Scrape:', { kit, teamSize, timespan })
+      const bot = await useBot()
+      return scrapeDuelsLeaderboard(bot, kit, teamSize, timespan)
+    }, { throwOnTimeout: true })
 
     return scrapeRes
   } catch (err: any) {

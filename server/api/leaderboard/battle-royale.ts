@@ -59,10 +59,14 @@ export default defineEventHandler(async (event) => {
 })
 
 const getBattleRoyaleLeaderboard = defineCachedFunction(async (gamemode: string, timespan: string) => {
-  const { addScrapeJob } = useScrapeQueue()
+  const scrapeQueue = useScrapeQueue()
 
   try {
-    const scrapeRes = await addScrapeJob({ category: 'battle-royale-leaderboard', gamemode, timespan })
+    const scrapeRes = await scrapeQueue.add(async () => {
+      console.log('Starting BR Leaderboard Scrape:', { gamemode, timespan })
+      const bot = await useBot()
+      return scrapeBattleRoyaleLeaderboard(bot, gamemode, timespan)
+    }, { throwOnTimeout: true })
 
     return scrapeRes
   } catch (err: any) {
