@@ -135,10 +135,6 @@ const kits = [
     label: 'NetherPot',
   },
   {
-    kit: 'boxing',
-    label: 'Boxing',
-  },
-  {
     kit: 'bridge',
     label: 'Bridge',
   },

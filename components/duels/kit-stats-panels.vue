@@ -28,10 +28,6 @@
     :stats="props.netherPot"
   />
   <KitStatsPanel
-    class-name="Boxing"
-    :stats="props.boxing"
-  />
-  <KitStatsPanel
     class-name="Bridge"
     :stats="props.bridge"
   />

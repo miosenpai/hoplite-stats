@@ -24,7 +24,7 @@ export type DuelsStats = {
   archer: KitStats
   potion: KitStats
   netherPot: KitStats
-  boxing: KitStats
+  // boxing: KitStats
   bridge: KitStats
   parkour: KitStats
   // uhc: KitStats
@@ -63,7 +63,6 @@ export const parseDuelsStats = async (statsWindowItems: any): Promise<DuelsStats
     archer: await parseKitStats(statsWindowItems, 'Archer'),
     potion: await parseKitStats(statsWindowItems, 'Potion'),
     netherPot: await parseKitStats(statsWindowItems, 'NetherPot'),
-    boxing: await parseKitStats(statsWindowItems, 'Boxing'),
     bridge: await parseKitStats(statsWindowItems, 'Bridge'),
     parkour: await parseKitStats(statsWindowItems, 'Parkour'),
   }

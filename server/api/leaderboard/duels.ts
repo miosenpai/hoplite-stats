@@ -10,7 +10,6 @@ const querySchema = z.object({
     'archer',
     'potion',
     'nether-pot',
-    'boxing',
     'bridge',
     'parkour',
     'custom',
