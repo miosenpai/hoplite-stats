@@ -15,7 +15,7 @@ export default defineEventHandler(async (event) => {
 
   const uuidRes = await useMojangApi().usernameToUuid(username)
 
-  if (uuidRes.status === 404 || uuidRes._data!.demo) {
+  if (uuidRes.status !== 200 || uuidRes._data!.demo) {
     throw createError({
       statusCode: 404,
       message: ScrapeError.PROFILE_NOT_FOUND,
