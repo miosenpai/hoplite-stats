@@ -13,7 +13,7 @@ export default defineEventHandler(async (event) => {
 
   const username = getRouterParam(event, 'username')!
 
-  const uuidRes = await useMojangApi().usernameToUuid(username)
+  const uuidRes = await useAshconApi().usernameToUuid(username)
 
   if (uuidRes.status !== 200 || uuidRes._data!.demo) {
     throw createError({
@@ -24,7 +24,7 @@ export default defineEventHandler(async (event) => {
 
   const cacheStore = useStorage('cache')
 
-  const currKeys = await cacheStore.getKeys(`nitro:functions:stats:${uuidRes._data!.id}`)
+  const currKeys = await cacheStore.getKeys(`nitro:functions:stats:${uuidRes._data!.uuid}`)
 
   // console.log(currKeys)
 
@@ -43,7 +43,7 @@ export default defineEventHandler(async (event) => {
 
     const runtimeCfg = useRuntimeConfig()
 
-    const sseToken = await new jose.SignJWT({ uuid: uuidRes._data!.id, username: uuidRes._data!.name })
+    const sseToken = await new jose.SignJWT({ uuid: uuidRes._data!.uuid, username: uuidRes._data!.username })
       .setProtectedHeader({ alg: 'HS256' })
       .sign(Buffer.from(runtimeCfg.sseSecret))
 
@@ -54,10 +54,10 @@ export default defineEventHandler(async (event) => {
 
   switch (query.category) {
     case 'battle-royale':
-      statsRes = await getBattleRoyaleStats(uuidRes._data!.id, uuidRes._data!.name)
+      statsRes = await getBattleRoyaleStats(uuidRes._data!.uuid, uuidRes._data!.username)
       break
     case 'duels':
-      statsRes = await getDuelsStats(uuidRes._data!.id, uuidRes._data!.name)
+      statsRes = await getDuelsStats(uuidRes._data!.uuid, uuidRes._data!.username)
       break
   }
 
@@ -68,7 +68,7 @@ export default defineEventHandler(async (event) => {
     })
   } else {
     return {
-      username: uuidRes._data!.name,
+      username: uuidRes._data!.username,
       stats: statsRes,
     }
   }
