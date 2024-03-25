@@ -26,9 +26,15 @@ export const scrapeWindowStats = async (bot: Bot, username: string, category: 'b
 
   const errMsgObserver = (jsonMsg: ChatMessage, position: string) => {
     if (position === 'system') {
-      const isErrMsg = ERROR_CHAT_PATTERNS.some(pattern => jsonMsg.extra?.at(1)?.toString().endsWith(pattern))
-      if (isErrMsg)
-        statsErrMsg.abort()
+      const errSubstring = jsonMsg.extra?.at(1)?.toString()
+      if (!errSubstring)
+        return
+
+      if (errSubstring.endsWith(ERROR_CHAT_PATTERNS[0]))
+        statsErrMsg.abort(ScrapeError.PROFILE_NOT_FOUND)
+
+      if (errSubstring.endsWith(ERROR_CHAT_PATTERNS[1]))
+        statsErrMsg.abort(ScrapeError.PRIVATE_PROFILE)
     }
   }
 
@@ -38,8 +44,8 @@ export const scrapeWindowStats = async (bot: Bot, username: string, category: 'b
 
   try {
     statsMenu = (await once(bot, 'windowOpen', { signal: statsErrMsg.signal }))[0] as Window
-  } catch (err) {
-    throw Error(ScrapeError.PROFILE_NOT_FOUND)
+  } catch (err: any) {
+    throw Error(err.cause)
   } finally {
     bot.removeListener('message', errMsgObserver)
   }

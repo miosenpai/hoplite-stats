@@ -7,7 +7,7 @@
       v-if="errorCode"
       class="text-center"
     >
-      Error: {{ errorCode === 404 ? 'Failed to find player.' : 'Unexpected error occurred.' }}
+      Error: {{ errorCodeToMsg(errorCode) }}
     </h1>
     <template v-else>
       <h1
@@ -176,6 +176,17 @@ watch(selectedCategory, async (newCategory) => {
 useHead({
   title: username,
 })
+
+function errorCodeToMsg(code: number) {
+  switch (code) {
+    case 404:
+      return 'Failed to find player.'
+    case 403:
+      return 'Player\'s profile is private.'
+    default:
+      return 'Unexpected error occurred.'
+  }
+}
 
 // defineOgImageScreenshot()
 
