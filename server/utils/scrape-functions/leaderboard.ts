@@ -52,8 +52,8 @@ export const scrapeBattleRoyaleLeaderboard = async (bot: Bot, gamemode: string, 
     .reverse()
 
   const leaderboardRes: BattleRoyaleLeaderboard = {
-    wins: await parseLeaderboard(winsLeaderboardObjs),
-    kills: await parseLeaderboard(killsLeaderboardObjs),
+    wins: await parseEntityLeaderboard(winsLeaderboardObjs),
+    kills: await parseEntityLeaderboard(killsLeaderboardObjs),
   }
 
   return leaderboardRes
@@ -90,7 +90,7 @@ export const scrapeDuelsLeaderboard = async (bot: Bot, kit: string, teamSize: nu
   })
 
   return {
-    wins: await parseLeaderboard(winsLeaderboardObjs),
-    streaks: await parseLeaderboard(streaksLeaderboardObjs),
+    wins: await parseStandLeaderboard(winsLeaderboardObjs),
+    streaks: await parseStandLeaderboard(streaksLeaderboardObjs),
   } as DuelsLeaderboard
 }
