@@ -30,9 +30,6 @@ export const scrapeBattleRoyaleLeaderboard = async (bot: Bot, gamemode: string, 
   const modeCfgChanged = await cycleConfigBtn(bot, settingsWindow, 'Mode', gamemode)
   const timespanCfgChanged = await cycleConfigBtn(bot, settingsWindow, 'Select Time Span', timespan)
 
-  const winsLeaderboardObjs: any[] = []
-  const killsLeaderboardObjs: any[] = []
-
   bot.closeWindow(settingsWindow)
 
   if (modeCfgChanged || timespanCfgChanged) {
@@ -44,15 +41,15 @@ export const scrapeBattleRoyaleLeaderboard = async (bot: Bot, gamemode: string, 
 
   console.log('Parsing Leaderboard JSON')
 
-  Object.values(bot.entities).filter(e => e.displayName === 'Armor Stand').forEach((e) => {
-    if (JSON.stringify(e.getCustomName()?.json)?.includes('-')) {
-      if (e.position.xzDistanceTo(BR_WINS_LEADERBOARD_POS) <= 2)
-        winsLeaderboardObjs.push(e.getCustomName()?.json)
+  const winsLeaderboardObjs = Object.values(bot.entities)
+    .filter(e => e.position.xzDistanceTo(BR_WINS_LEADERBOARD_POS) <= 2 && e.displayName === 'Text Display')
+    .map(e => JSON.parse(`${e.metadata.at(-1)}`))
+    .reverse()
 
-      if (e.position.xzDistanceTo(BR_KILLS_LEADERBOARD_POS) <= 2)
-        killsLeaderboardObjs.push(e.getCustomName()?.json)
-    }
-  })
+  const killsLeaderboardObjs = Object.values(bot.entities)
+    .filter(e => e.position.xzDistanceTo(BR_KILLS_LEADERBOARD_POS) <= 2 && e.displayName === 'Text Display')
+    .map(e => JSON.parse(`${e.metadata.at(-1)}`))
+    .reverse()
 
   const leaderboardRes: BattleRoyaleLeaderboard = {
     wins: await parseLeaderboard(winsLeaderboardObjs),

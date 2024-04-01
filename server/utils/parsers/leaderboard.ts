@@ -1,8 +1,13 @@
 import jsonata from 'jsonata'
 
-const leaderboardQuery = jsonata(`$[[1..10]].{
+const standleaderboardQuery = jsonata(`$[[1..10]].{
   'username': $trim(extra[-3].text),
   'value': $number(extra[-1].text)
+}`)
+
+const entityLeaderboardQuery = jsonata(`$[[2..11]].**[extra.text='- '].{
+  'username': $trim($.text),
+  'value': $number($.extra.extra.text)
 }`)
 
 export type LeaderboardEntry = {
@@ -10,8 +15,15 @@ export type LeaderboardEntry = {
   value: number
 }
 
-export const parseLeaderboard = async (leaderboardData: any) => {
-  const parseRes = await leaderboardQuery.evaluate(leaderboardData)
+export const parseStandLeaderboard = async (leaderboardData: any) => {
+  const parseRes = await standleaderboardQuery.evaluate(leaderboardData)
+
+  // workaround for https://github.com/jsonata-js/jsonata/issues/296
+  return JSON.parse(JSON.stringify(parseRes)) as LeaderboardEntry[]
+}
+
+export const parseEntityLeaderboard = async (leaderboardData: any) => {
+  const parseRes = await entityLeaderboardQuery.evaluate(leaderboardData)
 
   // workaround for https://github.com/jsonata-js/jsonata/issues/296
   return JSON.parse(JSON.stringify(parseRes)) as LeaderboardEntry[]
