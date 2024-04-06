@@ -43,12 +43,12 @@ export const scrapeBattleRoyaleLeaderboard = async (bot: Bot, gamemode: string, 
 
   const winsLeaderboardObjs = Object.values(bot.entities)
     .filter(e => e.position.xzDistanceTo(BR_WINS_LEADERBOARD_POS) <= 2 && e.displayName === 'Text Display')
-    .map(e => JSON.parse(`${e.metadata.at(-1)}`))
+    .map(e => JSON.parse(`${e.metadata.at(-2)}`))
     .reverse()
 
   const killsLeaderboardObjs = Object.values(bot.entities)
     .filter(e => e.position.xzDistanceTo(BR_KILLS_LEADERBOARD_POS) <= 2 && e.displayName === 'Text Display')
-    .map(e => JSON.parse(`${e.metadata.at(-1)}`))
+    .map(e => JSON.parse(`${e.metadata.at(-2)}`))
     .reverse()
 
   const leaderboardRes: BattleRoyaleLeaderboard = {
