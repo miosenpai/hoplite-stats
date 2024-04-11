@@ -21,9 +21,9 @@ const createNewBot = async () => {
     checkTimeoutInterval: 60 * 1000,
     // https://github.com/PrismarineJS/node-minecraft-protocol/blob/master/src/client/microsoftAuth.js#L11
     // https://github.com/PrismarineJS/prismarine-auth/blob/master/src/common/Constants.js
-    // authTitle: '389b1b32-b5d5-43b2-bddc-84ce938d6737',
+    authTitle: 'c36a9fb6-4f2a-41ff-90bd-ae7cc92031eb',
     // @ts-ignore
-    // flow: 'msal',
+    flow: 'msal',
   })
 
   const onResourcePack = () => {
