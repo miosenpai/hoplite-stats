@@ -12,18 +12,18 @@
   >
     <div class="grid gap-y-0.5">
       <h3 class="mt-0">
-        Solo Stats
+        Overall Stats
       </h3>
       <OverallStatsList
-        v-bind="props.solo"
+        v-bind="props.overall"
       />
     </div>
     <div class="grid gap-y-0.5">
       <h3 class="mt-0">
-        Duo Stats
+        Civilization Stats
       </h3>
       <OverallStatsList
-        v-bind="props.duo"
+        v-bind="props.solo"
       />
     </div>
     <div
@@ -39,7 +39,7 @@
           'col-span-1 sm:col-span-2 lg:col-span-1'
         ]"
       >
-        Civilization Stats
+        Overall Stats
       </h3>
       <OverallStatsList
         v-bind="props.civ"

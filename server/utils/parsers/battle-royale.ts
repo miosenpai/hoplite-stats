@@ -27,8 +27,8 @@ export type ClassStats = {
 
 export type OverallStatsFields = {
   solo: OverallStats
-  duo: OverallStats
   civ: OverallStats
+  overall: OverallStats
 }
 
 export type ClassStatsFields = {
@@ -79,8 +79,8 @@ const parseOverallStats = (overallStatsItems: any, queueName: string) => {
 export const parseBattleRoyaleStats = async (brStatsItems: any): Promise<BattleRoyaleStats> => {
   const overallStats: OverallStatsFields = {
     solo: await parseOverallStats(brStatsItems, 'Solo'),
-    duo: await parseOverallStats(brStatsItems, 'Duo'),
     civ: await parseOverallStats(brStatsItems, 'Civilization'),
+    overall: await parseOverallStats(brStatsItems, 'Overall'),
   }
 
   const classStats: ClassStatsFields = {
