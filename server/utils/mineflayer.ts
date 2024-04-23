@@ -2,6 +2,7 @@ import mineflayer from 'mineflayer'
 import { on, once } from 'node:events'
 import { pathfinder, Movements } from 'mineflayer-pathfinder'
 import timer from 'node:timers/promises'
+import pTimeout from 'p-timeout'
 
 let bot: mineflayer.Bot | null = null
 
@@ -33,39 +34,45 @@ const createNewBot = async () => {
 
   newBot.on('resourcePack', onResourcePack)
 
-  const onAfkMsg = async (actionBarMsg: { text: string }) => {
-    if (actionBarMsg.text.includes('AFK') && !afk) {
-      afk = true
-      await once(newBot, 'respawn')
-      console.log('Entered AFK Lobby')
-      await timer.setTimeout(10 * 1000)
+  const onAfkRespawn = async () => {
+    if (afk)
+      return
 
-      // the limbo server's a subset of a full MC server, breaks mineflayer ticks so this doesn't work
-      // newBot.look(newBot.entity.yaw + 10, newBot.entity.pitch, true)
+    await timer.setTimeout(5 * 1000)
+    const receivedBarMsg = await pTimeout(once(newBot._client, 'action_bar'), {
+      milliseconds: 2 * 1000,
+      message: false,
+    })
+    if (!receivedBarMsg)
+      return
 
-      const originalYaw = newBot.entity.yaw
-      let offset = 1
+    afk = true
+    console.log('Entered AFK Lobby')
 
-      const rotateTask = setInterval(() => {
-        newBot._client.write('look', {
-          yaw: originalYaw + offset,
-          pitch: newBot.entity.pitch,
-          onGround: true,
-        })
-        offset += 1
-      }, 100)
+    // the limbo server's a subset of a full MC server, breaks mineflayer ticks so this doesn't work
+    // newBot.look(newBot.entity.yaw + 10, newBot.entity.pitch, true)
+    const originalYaw = newBot.entity.yaw
+    let offset = 1
 
-      await once(newBot, 'respawn')
+    const rotateTask = setInterval(() => {
+      newBot._client.write('look', {
+        yaw: originalYaw + offset,
+        pitch: newBot.entity.pitch,
+        onGround: true,
+      })
+      offset += 1
+    }, 100)
 
-      clearInterval(rotateTask)
+    await once(newBot, 'respawn')
 
-      console.log('Exited AFK Lobby')
-      afk = false
-    }
+    clearInterval(rotateTask)
+
+    afk = false
+    console.log('Exited AFK Lobby')
   }
 
   afk = false
-  newBot._client.on('action_bar', onAfkMsg)
+  newBot.on('respawn', onAfkRespawn)
 
   newBot.on('kicked', console.log)
   newBot.on('error', console.log)
@@ -80,7 +87,7 @@ const createNewBot = async () => {
 
   const cleanUpListeners = () => {
     newBot.removeListener('resourcePack', onResourcePack)
-    newBot._client.removeListener('action_bar', onAfkMsg)
+    newBot.removeListener('respawn', onAfkRespawn)
 
     newBot.removeListener('kicked', console.log)
     newBot.removeListener('error', console.log)
