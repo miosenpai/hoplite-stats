@@ -1,4 +1,4 @@
-type UsernameToUuidRes = {
+export type UsernameToUuidRes = {
   id: string
   name: string
   legacy?: true
@@ -6,9 +6,7 @@ type UsernameToUuidRes = {
 }
 
 function usernameToUuid(username: string) {
-  return $fetch.raw<UsernameToUuidRes>(`https://api.mojang.com/users/profiles/minecraft/${username}`, {
-    ignoreResponseError: true,
-  })
+  return $fetch<UsernameToUuidRes>(`https://api.mojang.com/users/profiles/minecraft/${username}`)
 }
 
 export function useMojangApi() {

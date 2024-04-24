@@ -13,9 +13,11 @@ export default defineEventHandler(async (event) => {
 
   const username = getRouterParam(event, 'username')!
 
-  const uuidRes = await useAshconApi().usernameToUuid(username)
+  let uuidRes = null
 
-  if (uuidRes.status !== 200 || uuidRes._data!.demo) {
+  try {
+    uuidRes = await usePlayerDb().usernameToUuid(username)
+  } catch (err: any) {
     throw createError({
       statusCode: 404,
       message: ScrapeError.PROFILE_NOT_FOUND,
@@ -24,7 +26,7 @@ export default defineEventHandler(async (event) => {
 
   const cacheStore = useStorage('cache')
 
-  const currKeys = await cacheStore.getKeys(`nitro:functions:stats:${uuidRes._data!.uuid}`)
+  const currKeys = await cacheStore.getKeys(`nitro:functions:stats:${uuidRes.id}`)
 
   // console.log(currKeys)
 
@@ -43,7 +45,7 @@ export default defineEventHandler(async (event) => {
 
     const runtimeCfg = useRuntimeConfig()
 
-    const sseToken = await new jose.SignJWT({ uuid: uuidRes._data!.uuid, username: uuidRes._data!.username })
+    const sseToken = await new jose.SignJWT({ uuid: uuidRes.id, username: uuidRes.name })
       .setProtectedHeader({ alg: 'HS256' })
       .sign(Buffer.from(runtimeCfg.sseSecret))
 
@@ -54,10 +56,10 @@ export default defineEventHandler(async (event) => {
 
   switch (query.category) {
     case 'battle-royale':
-      statsRes = await getBattleRoyaleStats(uuidRes._data!.uuid, uuidRes._data!.username)
+      statsRes = await getBattleRoyaleStats(uuidRes.id, uuidRes.name)
       break
     case 'duels':
-      statsRes = await getDuelsStats(uuidRes._data!.uuid, uuidRes._data!.username)
+      statsRes = await getDuelsStats(uuidRes.id, uuidRes.name)
       break
   }
 
@@ -68,7 +70,7 @@ export default defineEventHandler(async (event) => {
     })
   } else {
     return {
-      username: uuidRes._data!.username,
+      username: uuidRes.name,
       stats: statsRes,
     }
   }
