@@ -7,7 +7,7 @@
     "dev": "nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
-    "postinstall": "cross-env NODE_OPTIONS=\"--max-old-space-size=8192\" nuxt prepare",
+    "postinstall": "patch-package && cross-env NODE_OPTIONS=\"--max-old-space-size=8192\" nuxt prepare",
     "lint": "eslint .",
     "start": "node .output/server/index.mjs"
   },
@@ -35,6 +35,7 @@
     "p-queue": "^8.0.1",
     "p-retry": "^6.2.0",
     "p-timeout": "^6.1.2",
+    "patch-package": "^8.0.0",
     "prismarine-viewer": "^1.28.0",
     "typescript": "^5.3.3",
     "vue": "^3.4.25",
