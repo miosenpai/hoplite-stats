@@ -1,6 +1,6 @@
 import jsonata from 'jsonata'
 
-const standleaderboardQuery = jsonata(`$[[1..10]].{
+const standLeaderboardQuery = jsonata(`$[[1..10]].{
   'username': $trim(extra[-3].text),
   'value': $number(extra[-1].text)
 }`)
@@ -16,7 +16,7 @@ export type LeaderboardEntry = {
 }
 
 export const parseStandLeaderboard = async (leaderboardData: any) => {
-  const parseRes = await standleaderboardQuery.evaluate(leaderboardData)
+  const parseRes = await standLeaderboardQuery.evaluate(leaderboardData)
 
   // workaround for https://github.com/jsonata-js/jsonata/issues/296
   return JSON.parse(JSON.stringify(parseRes)) as LeaderboardEntry[]
