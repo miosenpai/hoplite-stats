@@ -35,8 +35,10 @@
         {{ username }}
       </h1>
       <USelectMenu
+        :ui="{
+          wrapper: 'not-prose w-40 ml-auto flex-shrink'
+        }"
         v-model="selectedCategory"
-        class="not-prose w-40 ml-auto flex-shrink"
         :options="categories"
         size="lg"
         :disabled="pending"
