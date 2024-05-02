@@ -1,5 +1,3 @@
-import { getDuelsStats } from '../[username]'
-
 export default defineEventHandler(async (event) => {
   const username = getRouterParam(event, 'username')!
 
@@ -47,4 +45,29 @@ export default defineEventHandler(async (event) => {
     username: uuidRes.name,
     stats: duelsStats,
   }
+})
+
+const getDuelsStats = defineCachedFunction(async (uuid: string, username: string) => {
+  const scrapeQueue = useScrapeQueue()
+
+  try {
+    const scrapeRes = await scrapeQueue.add(async () => {
+      console.log('Starting Duels Stats Scrape:', username)
+      const bot = await useBot()
+      return scrapeWindowStats(bot, username, 'duels')
+    }, { throwOnTimeout: true })
+
+    return scrapeRes
+  } catch (err: any) { // must catch here, if defineCachedFunction errors it will infinitely return a cached res
+    if (Object.values(ScrapeError).includes(err.message)) {
+      return { err: err.message }
+    }
+    throw err
+  }
+}, {
+  maxAge: dayjs.duration(1, 'hours').asSeconds(),
+  name: 'stats',
+  getKey(uuid) {
+    return `${uuid}:duels`
+  },
 })

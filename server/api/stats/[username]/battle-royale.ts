@@ -1,5 +1,3 @@
-import { getBattleRoyaleStats } from '../[username]'
-
 export default defineEventHandler(async (event) => {
   const username = getRouterParam(event, 'username')!
 
@@ -46,4 +44,30 @@ export default defineEventHandler(async (event) => {
     username: uuidRes.name,
     stats: battleRoyaleStats,
   }
+})
+
+const getBattleRoyaleStats = defineCachedFunction(async (uuid: string, username: string) => {
+  const scrapeQueue = useScrapeQueue()
+
+  try {
+    const scrapeRes = await scrapeQueue.add(async () => {
+      console.log('Starting BR Stats Scrape:', username)
+      const bot = await useBot()
+      return scrapeWindowStats(bot, username, 'battle-royale')
+    }, { throwOnTimeout: true })
+
+    return scrapeRes
+  } catch (err: any) { // must catch here, if defineCachedFunction errors it will infinitely return a cached res
+    if (Object.values(ScrapeError).includes(err.message)) {
+      return { err: err.message }
+    }
+    throw err
+  }
+}, {
+  // todo: figure out a good cache duration for stats
+  maxAge: dayjs.duration(2, 'hours').asSeconds(),
+  name: 'stats',
+  getKey(uuid) {
+    return `${uuid}:battle-royale`
+  },
 })
