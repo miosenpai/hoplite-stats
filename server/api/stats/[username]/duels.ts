@@ -19,7 +19,8 @@ export default defineEventHandler(async (event) => {
 
   if (!cached) {
     // can probably just use uuid here (extend p-queue with a map uuid -> promise)
-    // console.log('not cached')
+    // console.log('duels cached: ' + cached)
+
     const jobId = `stats:${uuidRes.id}:duels`
     const jobExists = await scrapeJobStore.hasItem(jobId)
 

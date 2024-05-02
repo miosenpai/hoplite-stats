@@ -35,7 +35,7 @@
       </h1>
       <template v-else>
         <h1
-          v-if="sseStatus !== 'CLOSED'"
+          v-if="'jobId' in (selectedFetcher.data.value as any)"
           class="text-center"
         >
           First time visit, loading may take longer than usual.
@@ -80,74 +80,6 @@
       </div>
     </template>
   </UContainer>
-
-  <!-- <UContainer
-    v-if="errorCode || initalScrapeLoading || !username"
-    :class="[prose, 'flex flex-col justify-center min-h-full']"
-  >
-    <h1
-      v-if="errorCode"
-      class="text-center"
-    >
-      Error: {{ errorCodeToMsg(errorCode) }}
-    </h1>
-    <template v-else>
-      <h1
-        v-if="initalScrapeLoading"
-        class="text-center"
-      >
-        First time visit, loading may take longer than usual.
-      </h1>
-      <UProgress />
-    </template>
-  </UContainer>
-  <UContainer v-else>
-    <template v-if="!pending">
-      <div
-        :class="[
-          'flex',
-          'py-6',
-          'gap-x-6'
-        ]"
-      >
-        <img
-          :src="`https://minotar.net/helm/${username}`"
-          :class="[
-            'flex-shrink-0',
-            'hidden lg:block',
-            'self-start',
-            'w-56'
-          ]"
-        >
-        <OverallStatsPanel
-          v-if="selectedCategory === 'battle-royale'"
-          v-bind="(profileData as ProfileType<BattleRoyaleStats>).stats"
-          class="flex-grow"
-        />
-        <LadderStatsPanel
-          v-else
-          v-bind="(profileData as ProfileType<DuelsStats>).stats"
-          class="flex-grow"
-        />
-      </div>
-      <div
-        :class="[
-          'grid',
-          'grid-cols-1 sm:grid-cols-2',
-          'gap-6 pb-6'
-        ]"
-      >
-        <ClassStatsPanels
-          v-if="selectedCategory === 'battle-royale'"
-          v-bind="(profileData as ProfileType<BattleRoyaleStats>).stats"
-        />
-        <KitStatsPanels
-          v-else
-          v-bind="(profileData as ProfileType<DuelsStats>).stats"
-        />
-      </div>
-    </template>
-  </UContainer> -->
 </template>
 
 <script setup lang="ts">
@@ -175,18 +107,6 @@ const selectedCategory = ref(categories.map(c => c.category).includes(categoryQu
 
 const usernameParam = route.params.username as string
 
-// future: looking into client side caching once https://github.com/nuxt/nuxt/issues/24332 is fixed
-/* const { data: profileData, error, pending, refresh } = await useFetch(`/api/stats/${usernameParam}`, {
-    query: {
-      category: selectedCategory,
-    },
-    onResponse: ({ response }) => {
-      if (response.status === 202)
-        initalScrapeLoading.value = true
-    },
-    lazy: true,
-  }) */
-
 const battleRoyaleFetcher = await useLazyFetch(`/api/stats/${usernameParam}/battle-royale`, {
   immediate: false,
 })
@@ -197,7 +117,9 @@ const duelsFetcher = await useLazyFetch(`/api/stats/${usernameParam}/duels`, {
 
 const selectedFetcher = computed(() => selectedCategory.value === 'battle-royale' ? battleRoyaleFetcher : duelsFetcher)
 
-await callOnce(() => selectedFetcher.value.refresh())
+await callOnce(useId(), async () => {
+  await selectedFetcher.value.refresh()
+})
 
 watch(selectedFetcher, async (newFetcher) => {
   await newFetcher.refresh()
@@ -208,7 +130,7 @@ const sseError = ref(0)
 const errorCode = computed(() => selectedFetcher.value.error.value?.statusCode || sseError.value)
 
 const noData = computed(() => {
-  return !selectedFetcher.value.data.value || 'jobId' in selectedFetcher.value.data.value || sseStatus.value !== 'CLOSED' || errorCode.value !== 0
+  return selectedFetcher.value.pending.value || 'jobId' in (selectedFetcher.value.data.value as any) || errorCode.value !== 0
 })
 
 const { open: openSSE, event: sseEvent, status: sseStatus, close: closeSSE } = useEventSource(
@@ -221,18 +143,26 @@ sseStatus.value = 'CLOSED'
 
 watch(() => selectedFetcher.value.data.value, (newData) => {
   if (import.meta.client && newData && 'jobId' in newData) {
+    // ensure the sseEvent watcher triggers even if prev event was 'complete' as well
+    sseEvent.value = null
     openSSE()
   }
 }, { immediate: true })
 
 watch(sseEvent, async (newEvent) => {
-  if (newEvent === 'complete') {
-    await selectedFetcher.value.execute()
+  if (newEvent) {
+    console.log(selectedFetcher)
+
+    if (newEvent === 'complete') {
+      await selectedFetcher.value.execute()
+    }
+
+    if (newEvent === 'fail') {
+      sseError.value = 500
+    }
+
     closeSSE()
   }
-
-  if (newEvent === 'fail')
-    sseError.value = 500
 })
 
 watch(selectedCategory, async (newCategory) => {
