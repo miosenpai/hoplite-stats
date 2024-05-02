@@ -1,5 +1,87 @@
 <template>
-  <UContainer
+  <UContainer>
+    <div
+      class="flex items-center py-4 gap-x-4"
+      :class="[prose, 'max-w-none']"
+    >
+      <img
+        v-if="selectedFetcher.data.value?.username"
+        :src="`https://minotar.net/helm/${selectedFetcher.data.value?.username}`"
+        :class="[
+          'not-prose h-10'
+        ]"
+      >
+      <h1 class="m-0">
+        {{ selectedFetcher.data.value?.username || usernameParam }}
+      </h1>
+      <USelectMenu
+        v-model="selectedCategory"
+        :ui="{
+          wrapper: 'not-prose w-40 ml-auto flex-shrink'
+        }"
+        :options="categories"
+        size="lg"
+        :disabled="noData"
+        value-attribute="category"
+      />
+    </div>
+    <UDivider />
+    <div v-if="noData">
+      <h1
+        v-if="errorCode"
+        class="text-center"
+      >
+        {{ errorCodeToMsg(errorCode) }}
+      </h1>
+      <template v-else>
+        <h1
+          v-if="sseStatus !== 'CLOSED'"
+          class="text-center"
+        >
+          First time visit, loading may take longer than usual.
+        </h1>
+        <UProgress />
+      </template>
+    </div>
+    <template v-else>
+      <div
+        :class="[
+          'flex',
+          'py-6',
+          'gap-x-6'
+        ]"
+      >
+        <OverallStatsPanel
+          v-if="selectedCategory === 'battle-royale'"
+          v-bind="(selectedFetcher.data.value as ProfileType<BattleRoyaleStats>).stats"
+          class="flex-grow"
+        />
+        <LadderStatsPanel
+          v-else
+          v-bind="(selectedFetcher.data.value as ProfileType<DuelsStats>).stats"
+          class="flex-grow"
+        />
+      </div>
+      <div
+        :class="[
+          'grid',
+          'grid-cols-1 sm:grid-cols-2',
+          'gap-6 pb-6'
+        ]"
+      >
+        <ClassStatsPanels
+          v-if="selectedCategory === 'battle-royale'"
+          v-bind="(selectedFetcher.data.value as ProfileType<BattleRoyaleStats>).stats"
+        />
+        <KitStatsPanels
+          v-else
+          v-bind="(selectedFetcher.data.value as ProfileType<DuelsStats>).stats"
+        />
+      </div>
+    </template>
+  </UContainer>
+
+  <!-- <UContainer
     v-if="errorCode || initalScrapeLoading || !username"
     :class="[prose, 'flex flex-col justify-center min-h-full']"
   >
@@ -20,32 +102,6 @@
     </template>
   </UContainer>
   <UContainer v-else>
-    <div
-      class="flex items-center py-4 gap-x-4"
-      :class="[prose, 'max-w-none']"
-    >
-      <img
-        :src="`https://minotar.net/helm/${username}`"
-        :class="[
-          'not-prose h-10',
-          'block lg:hidden'
-        ]"
-      >
-      <h1 class="m-0">
-        {{ username }}
-      </h1>
-      <USelectMenu
-        :ui="{
-          wrapper: 'not-prose w-40 ml-auto flex-shrink'
-        }"
-        v-model="selectedCategory"
-        :options="categories"
-        size="lg"
-        :disabled="pending"
-        value-attribute="category"
-      />
-    </div>
-    <UDivider />
     <template v-if="!pending">
       <div
         :class="[
@@ -91,7 +147,7 @@
         />
       </div>
     </template>
-  </UContainer>
+  </UContainer> -->
 </template>
 
 <script setup lang="ts">
@@ -119,64 +175,72 @@ const selectedCategory = ref(categories.map(c => c.category).includes(categoryQu
 
 const usernameParam = route.params.username as string
 
-const initalScrapeLoading = ref(false)
-
-const username = ref<null | string>(null)
-
 // future: looking into client side caching once https://github.com/nuxt/nuxt/issues/24332 is fixed
-const { data: profileData, error, pending, refresh } = await useFetch(`/api/stats/${usernameParam}`, {
-  query: {
-    category: selectedCategory,
-  },
-  onResponse: ({ response }) => {
-    if (response.status === 202)
-      initalScrapeLoading.value = true
-  },
-  lazy: true,
+/* const { data: profileData, error, pending, refresh } = await useFetch(`/api/stats/${usernameParam}`, {
+    query: {
+      category: selectedCategory,
+    },
+    onResponse: ({ response }) => {
+      if (response.status === 202)
+        initalScrapeLoading.value = true
+    },
+    lazy: true,
+  }) */
+
+const battleRoyaleFetcher = await useLazyFetch(`/api/stats/${usernameParam}/battle-royale`, {
+  immediate: false,
+})
+
+const duelsFetcher = await useLazyFetch(`/api/stats/${usernameParam}/duels`, {
+  immediate: false,
+})
+
+const selectedFetcher = computed(() => selectedCategory.value === 'battle-royale' ? battleRoyaleFetcher : duelsFetcher)
+
+await callOnce(() => selectedFetcher.value.refresh())
+
+watch(selectedFetcher, async (newFetcher) => {
+  await newFetcher.refresh()
 })
 
 const sseError = ref(0)
 
-const errorCode = computed(() => error.value?.statusCode || sseError.value)
+const errorCode = computed(() => selectedFetcher.value.error.value?.statusCode || sseError.value)
 
-watch(profileData, (newProfileData) => {
-  if (newProfileData) {
-    if ('username' in newProfileData && !username.value) {
-      username.value = newProfileData.username
-    }
+const noData = computed(() => {
+  return !selectedFetcher.value.data.value || 'jobId' in selectedFetcher.value.data.value || sseStatus.value !== 'CLOSED' || errorCode.value !== 0
+})
 
-    // client only, SSE should not be subscribed during SSR
-    if (import.meta.client && 'sseToken' in newProfileData) {
-      const es = new EventSource(`/api/stats-sse?sseToken=${newProfileData.sseToken}`)
+const { open: openSSE, event: sseEvent, status: sseStatus, close: closeSSE } = useEventSource(
+  () => `/api/sse?jobId=${(selectedFetcher.value.data.value as any).jobId}`,
+  ['complete', 'fail'],
+  { immediate: false },
+)
+// workaround: sseStatus starts as 'CONNECTING' even if immediate is set to false
+sseStatus.value = 'CLOSED'
 
-      const onComplete = async () => {
-        es.close()
-        await refresh()
-        initalScrapeLoading.value = false
-        es.removeEventListener('complete', onComplete)
-        es.removeEventListener('fail', onFail)
-      }
-
-      const onFail = async () => {
-        es.close()
-        sseError.value = 500
-        initalScrapeLoading.value = false
-        es.removeEventListener('complete', onComplete)
-        es.removeEventListener('fail', onFail)
-      }
-
-      es.addEventListener('complete', onComplete)
-      es.addEventListener('fail', onFail)
-    }
+watch(() => selectedFetcher.value.data.value, (newData) => {
+  if (import.meta.client && newData && 'jobId' in newData) {
+    openSSE()
   }
 }, { immediate: true })
+
+watch(sseEvent, async (newEvent) => {
+  if (newEvent === 'complete') {
+    await selectedFetcher.value.execute()
+    closeSSE()
+  }
+
+  if (newEvent === 'fail')
+    sseError.value = 500
+})
 
 watch(selectedCategory, async (newCategory) => {
   await navigateTo({ name: route.name!, query: { category: newCategory !== 'battle-royale' ? newCategory : undefined } })
 })
 
 useHead({
-  title: username,
+  title: selectedFetcher.value.data.value?.username || usernameParam,
 })
 
 function errorCodeToMsg(code: number) {

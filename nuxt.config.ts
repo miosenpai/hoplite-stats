@@ -45,6 +45,12 @@ export default defineNuxtConfig({
       // https://nitro.unjs.io/guide/utils#experimental-composition-api
       asyncContext: true,
     },
+    storage: {
+      lru: {
+        driver: 'lruCache',
+        max: 100,
+      },
+    },
   },
   typescript: {
     typeCheck: 'build',
