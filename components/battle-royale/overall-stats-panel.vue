@@ -20,7 +20,7 @@
     </div>
     <div class="grid gap-y-0.5">
       <h3 class="mt-0">
-        Civilization Stats
+        Solo Stats
       </h3>
       <OverallStatsList
         v-bind="props.solo"
@@ -39,7 +39,7 @@
           'col-span-1 sm:col-span-2 lg:col-span-1'
         ]"
       >
-        Overall Stats
+        Civilization Stats
       </h3>
       <OverallStatsList
         v-bind="props.civ"

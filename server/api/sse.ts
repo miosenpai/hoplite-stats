@@ -9,7 +9,9 @@ export default defineEventHandler(async (event) => {
 
   const scrapeJobStore = useStorage('lru')
 
-  if (!scrapeJobStore.hasItem(query.jobId))
+  const jobExists = await scrapeJobStore.hasItem(query.jobId)
+
+  if (!jobExists)
     throw createError({ statusCode: 404 })
 
   setHeader(event, 'cache-control', 'no-cache')
@@ -18,11 +20,11 @@ export default defineEventHandler(async (event) => {
   setResponseStatus(event, 200)
 
   try {
-    const jobRes = await (await scrapeJobStore.getItem<Promise<any>>(query.jobId))
-    scrapeJobStore.removeItem(query.jobId)
+    const jobRes = await (await scrapeJobStore.getItemRaw<Promise<any>>(query.jobId))
+    await scrapeJobStore.removeItem(query.jobId)
 
     event.node.res.write('event: complete\n')
-    event.node.res.write(`event: data:${jobRes}`)
+    event.node.res.write(`data:${jobRes}\n\n`)
   } catch {
     event.node.res.write('event: fail\n')
     event.node.res.write('data:\n\n')
