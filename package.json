@@ -26,7 +26,6 @@
     "cross-env": "^7.0.3",
     "dayjs": "^1.11.10",
     "eslint": "^8.56.0",
-    "jose": "^5.2.0",
     "jsonata": "^2.0.3",
     "mineflayer": "^4.18.0",
     "mineflayer-pathfinder": "^2.4.5",
