@@ -76,21 +76,18 @@ export const scrapeDuelsLeaderboard = async (bot: Bot, kit: string, teamSize: nu
 
   console.log('Parsing Leaderboard JSON')
 
-  const winsLeaderboardObjs: any[] = []
-  const streaksLeaderboardObjs: any[] = []
+  const winsLeaderboardObjs = Object.values(bot.entities)
+    .filter(e => e.position.xzDistanceTo(DUELS_WINS_LEADERBOARD_POS) <= 2 && e.displayName === 'Text Display')
+    .map(e => JSON.parse(`${e.metadata.at(-2)}`))
+    .reverse()
 
-  Object.values(bot.entities).filter(e => e.displayName === 'Armor Stand').forEach((e) => {
-    if (JSON.stringify(e.getCustomName()?.json)?.includes('-')) {
-      if (e.position.xzDistanceTo(DUELS_WINS_LEADERBOARD_POS) <= 2)
-        winsLeaderboardObjs.push(e.getCustomName()?.json)
-
-      if (e.position.xzDistanceTo(DUELS_STREAKS_LEADERBOARD_POS) <= 2)
-        streaksLeaderboardObjs.push(e.getCustomName()?.json)
-    }
-  })
+  const streaksLeaderboardObjs = Object.values(bot.entities)
+    .filter(e => e.position.xzDistanceTo(DUELS_STREAKS_LEADERBOARD_POS) <= 2 && e.displayName === 'Text Display')
+    .map(e => JSON.parse(`${e.metadata.at(-2)}`))
+    .reverse()
 
   return {
-    wins: await parseStandLeaderboard(winsLeaderboardObjs),
-    streaks: await parseStandLeaderboard(streaksLeaderboardObjs),
+    wins: await parseEntityLeaderboard(winsLeaderboardObjs),
+    streaks: await parseEntityLeaderboard(streaksLeaderboardObjs),
   } as DuelsLeaderboard
 }
