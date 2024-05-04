@@ -5,14 +5,14 @@
       :class="[prose, 'max-w-none']"
     >
       <img
-        v-if="selectedFetcher.data.value?.username"
-        :src="`https://minotar.net/helm/${selectedFetcher.data.value?.username}`"
+        v-if="statsData?.username"
+        :src="`https://minotar.net/helm/${statsData?.username}`"
         :class="[
           'not-prose h-10'
         ]"
       >
       <h1 class="m-0">
-        {{ selectedFetcher.data.value?.username || usernameParam }}
+        {{ statsData?.username || usernameParam }}
       </h1>
       <USelectMenu
         v-model="selectedCategory"
@@ -35,7 +35,7 @@
       </h1>
       <template v-else>
         <h1
-          v-if="'jobId' in (selectedFetcher.data.value as any)"
+          v-if="statsData"
           class="text-center"
         >
           First time visit, loading may take longer than usual.
@@ -53,12 +53,12 @@
       >
         <OverallStatsPanel
           v-if="selectedCategory === 'battle-royale'"
-          v-bind="(selectedFetcher.data.value as ProfileType<BattleRoyaleStats>).stats"
+          v-bind="(statsData as ProfileType<BattleRoyaleStats>).stats"
           class="flex-grow"
         />
         <LadderStatsPanel
           v-else
-          v-bind="(selectedFetcher.data.value as ProfileType<DuelsStats>).stats"
+          v-bind="(statsData as ProfileType<DuelsStats>).stats"
           class="flex-grow"
         />
       </div>
@@ -71,11 +71,11 @@
       >
         <ClassStatsPanels
           v-if="selectedCategory === 'battle-royale'"
-          v-bind="(selectedFetcher.data.value as ProfileType<BattleRoyaleStats>).stats"
+          v-bind="(statsData as ProfileType<BattleRoyaleStats>).stats"
         />
         <KitStatsPanels
           v-else
-          v-bind="(selectedFetcher.data.value as ProfileType<DuelsStats>).stats"
+          v-bind="(statsData as ProfileType<DuelsStats>).stats"
         />
       </div>
     </template>
@@ -107,41 +107,23 @@ const selectedCategory = ref(categories.map(c => c.category).includes(categoryQu
 
 const usernameParam = route.params.username as string
 
-const battleRoyaleFetcher = await useLazyFetch(`/api/stats/${usernameParam}/battle-royale`, {
-  immediate: false,
-})
-
-const duelsFetcher = await useLazyFetch(`/api/stats/${usernameParam}/duels`, {
-  immediate: false,
-})
-
-const selectedFetcher = computed(() => selectedCategory.value === 'battle-royale' ? battleRoyaleFetcher : duelsFetcher)
-
-await callOnce(useId(), async () => {
-  await selectedFetcher.value.refresh()
-})
-
-watch(selectedFetcher, async (newFetcher) => {
-  await newFetcher.refresh()
-})
+const { data: statsData, error: statsError, refresh: refreshStats } = await useLazyFetch(() => `/api/stats/${usernameParam}/${selectedCategory.value}`)
 
 const sseError = ref(0)
 
-const errorCode = computed(() => selectedFetcher.value.error.value?.statusCode || sseError.value)
+const errorCode = computed(() => statsError.value?.statusCode || sseError.value)
 
-const noData = computed(() => {
-  return selectedFetcher.value.pending.value || 'jobId' in (selectedFetcher.value.data.value as any) || errorCode.value !== 0
-})
+const noData = computed(() => !statsData.value || 'jobId' in statsData.value || errorCode.value !== 0)
 
 const { open: openSSE, event: sseEvent, status: sseStatus, close: closeSSE } = useEventSource(
-  () => `/api/sse?jobId=${(selectedFetcher.value.data.value as any).jobId}`,
+  () => `/api/sse?jobId=${(statsData.value as any).jobId}`,
   ['complete', 'fail'],
   { immediate: false },
 )
 // workaround: sseStatus starts as 'CONNECTING' even if immediate is set to false
 sseStatus.value = 'CLOSED'
 
-watch(() => selectedFetcher.value.data.value, (newData) => {
+watch(statsData, (newData) => {
   if (import.meta.client && newData && 'jobId' in newData) {
     // ensure the sseEvent watcher triggers even if prev event was 'complete' as well
     sseEvent.value = null
@@ -151,10 +133,8 @@ watch(() => selectedFetcher.value.data.value, (newData) => {
 
 watch(sseEvent, async (newEvent) => {
   if (newEvent) {
-    console.log(selectedFetcher)
-
     if (newEvent === 'complete') {
-      await selectedFetcher.value.execute()
+      await refreshStats()
     }
 
     if (newEvent === 'fail') {
@@ -170,7 +150,7 @@ watch(selectedCategory, async (newCategory) => {
 })
 
 useHead({
-  title: selectedFetcher.value.data.value?.username || usernameParam,
+  title: statsData.value?.username || usernameParam,
 })
 
 function errorCodeToMsg(code: number) {
