@@ -14,36 +14,25 @@ const querySchema = z.object({
   ]).default('lifetime'),
 })
 
-const QUERY_COMBOS = ['solo', 'civ'].reduce((prev, curr: string) => {
-  const combos = ['lifetime', 'season', 'monthly', 'weekly', 'daily'].map(timespan => ({ gamemode: curr, timespan }))
-  prev.push(...combos)
-  return prev
-}, [] as { gamemode: string, timespan: string }[])
-
 export default defineEventHandler(async (event) => {
   const query = await getValidatedQuery(event, query => querySchema.parse(query))
 
   const cacheStore = useStorage('cache')
-
-  /* const currKeys = await cacheStore.getKeys('nitro:functions:leaderboard')
-
-  // first scrape
-  if (currKeys.length !== QUERY_COMBOS.length) {
-    QUERY_COMBOS
-      .filter(q => !currKeys.includes(`nitro:functions:leaderboard:${q.gamemode}:${q.timespan}.json`))
-      .forEach(q => getLeaderboard(q.gamemode, q.timespan))
-
-    setResponseStatus(event, 202)
-    return
-  } */
+  const scrapeJobStore = useStorage('lru')
 
   const cached = await cacheStore
     .hasItem(`nitro:functions:leaderboard:${query.gamemode}:${query.timespan}.json`)
 
   if (!cached) {
-    getBattleRoyaleLeaderboard(query.gamemode, query.timespan)
-    setResponseStatus(event, 202)
-    return
+    const jobId = `leaderboard:${query.gamemode}:${query.timespan}`
+    const jobExists = await scrapeJobStore.hasItem(jobId)
+
+    if (!jobExists)
+      await scrapeJobStore.setItemRaw(jobId, getBattleRoyaleLeaderboard(query.gamemode, query.timespan))
+
+    return {
+      jobId,
+    }
   }
 
   const leaderboardRes = await getBattleRoyaleLeaderboard(query.gamemode, query.timespan)

@@ -1,6 +1,6 @@
 <template>
   <UTable
-    :rows="leaderboardData ? leaderboardData[selectedCategory as 'kills' | 'wins'] : []"
+    :rows="leaderboardData && !('jobId' in leaderboardData) ? leaderboardData[selectedCategory as 'kills' | 'wins'] : []"
     :loading="pending"
     :empty-state="{
       icon: 'i-heroicons-circle-stack-20-solid',
@@ -140,23 +140,11 @@ const { data: leaderboardData, pending } = await useFetch('/api/leaderboard/batt
   lazy: true,
 })
 
-watch(selectedCategory, async (newCategory) => {
+watch([selectedCategory, selectedMode, selectedTimespan], async ([newCategory, newMode, newTimespan]) => {
   await navigateTo({ name: route.name!, query: {
     ...route.query,
     category: newCategory !== 'wins' ? newCategory : undefined,
-  } })
-})
-
-watch(selectedMode, async (newMode) => {
-  await navigateTo({ name: route.name!, query: {
-    ...route.query,
     mode: newMode !== 'solo' ? newMode : undefined,
-  } })
-})
-
-watch(selectedTimespan, async (newTimespan) => {
-  await navigateTo({ name: route.name!, query: {
-    ...route.query,
     timespan: newTimespan !== 'lifetime' ? newTimespan : undefined,
   } })
 })

@@ -33,14 +33,21 @@ export default defineEventHandler(async (event) => {
   const query = await getValidatedQuery(event, query => querySchema.parse(query))
 
   const cacheStore = useStorage('cache')
+  const scrapeJobStore = useStorage('lru')
 
   const cached = await cacheStore
     .hasItem(`nitro:functions:leaderboard:${query.kit}:${query.teamSize}v${query.teamSize}:${query.timespan}.json`)
 
   if (!cached) {
-    getDuelsLeaderboard(query.kit, query.teamSize, query.timespan)
-    setResponseStatus(event, 202)
-    return
+    const jobId = `leaderboard:${query.kit}:${query.teamSize}v${query.teamSize}:${query.timespan}`
+    const jobExists = await scrapeJobStore.hasItem(jobId)
+
+    if (!jobExists)
+      await scrapeJobStore.setItemRaw(jobId, getDuelsLeaderboard(query.kit, query.teamSize, query.timespan))
+
+    return {
+      jobId,
+    }
   }
 
   const leaderboardRes = await getDuelsLeaderboard(query.kit, query.teamSize, query.timespan)

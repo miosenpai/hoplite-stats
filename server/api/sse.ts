@@ -24,7 +24,7 @@ export default defineEventHandler(async (event) => {
   try {
     const jobRes = await jobPromise
     event.node.res.write('event: complete\n')
-    event.node.res.write(`data: ${jobRes}\n\n`)
+    event.node.res.write(`data: ${JSON.stringify(jobRes)}\n\n`)
   } catch {
     event.node.res.write('event: fail\n')
     event.node.res.write('data: \n\n')

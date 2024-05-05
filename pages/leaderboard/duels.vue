@@ -1,6 +1,6 @@
 <template>
   <UTable
-    :rows="leaderboardData ? leaderboardData[selectedCategory as 'wins' | 'streaks'] : []"
+    :rows="leaderboardData && !('jobId' in leaderboardData) ? leaderboardData[selectedCategory as 'wins' | 'streaks'] : []"
     :loading="pending"
     :empty-state="{
       icon: 'i-heroicons-circle-stack-20-solid',
